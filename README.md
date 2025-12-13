@@ -10,14 +10,17 @@ BasCAT is designed to teach computer architecture by providing:
 - **Interactive Debugging**: Step through code and watch the circuit animate in real-time
 - **Educational Accuracy**: Proper architectural hierarchy (ALU inside CPU, etc.)
 
-## Current Status: Phase 1 Complete ✅
+## Current Status: Phase 2 Complete ✅
 
 ### What's Working
-- **Circuit Visualization**: Interactive view showing CPU (with embedded ALU), registers, RAM, and buses
-- **Assembly Programming**: Simple instruction set (LOAD, ADD, SUB, JMP, HALT)
+- **Circuit Visualization**: Interactive view showing CPU (with embedded ALU), registers, RAM, I/O ports, and buses
+- **Assembly Programming**: Instruction set with I/O support (LOAD, ADD, SUB, JMP, IN, OUT, HALT)
+- **Interactive I/O System**: Memory-mapped I/O allowing programs to accept input and display output
+- **I/O Panel**: Dedicated GUI panel for user input/output interaction
 - **Execution Control**: Run, step, and reset with adjustable clock speed
-- **Real-time Animation**: Bus transfers and register updates visualized
+- **Real-time Animation**: Bus transfers, register updates, and I/O operations visualized
 - **ALU Flags Display**: Shows Zero, Negative, Carry, and Overflow flags
+- **Example Programs**: 3 example programs demonstrating I/O capabilities
 
 ### Architecture
 - **CPU**: 8-bit with embedded ALU
@@ -25,6 +28,10 @@ BasCAT is designed to teach computer architecture by providing:
   - Special Registers: PC (16-bit), IR (8-bit), MAR (16-bit)
   - ALU with flags: Z, N, C, O
 - **RAM**: 256 bytes
+  - 0x00-0xFD: General RAM
+  - 0xFE: OUTPUT port (memory-mapped I/O)
+  - 0xFF: INPUT port (memory-mapped I/O)
+- **I/O System**: Memory-mapped I/O controller with input queue and output buffer
 - **Buses**: Data bus and Address bus with visual animations
 
 ## Installation
@@ -62,13 +69,18 @@ Or use the convenience script:
 
 ### Writing Assembly Code
 
-Example program:
+Example program with I/O:
 ```assembly
-; Simple addition
-LOAD A, 10    ; Load 10 into register A
-ADD A, 5      ; Add 5 to A
+; Echo program - reads input and echoes to output
+IN A          ; Read character from input to register A
+OUT A         ; Write register A to output
 HALT          ; Stop execution
 ```
+
+More examples in the [examples/](examples/) directory:
+- `01_echo.asm` - Simple echo program
+- `02_add_numbers.asm` - Sequential input demonstration
+- `03_hello_world.asm` - Outputs "HI"
 
 ### Controls
 - **Run**: Execute the program continuously at the selected speed
@@ -76,12 +88,21 @@ HALT          ; Stop execution
 - **Reset**: Clear all registers and stop execution
 - **Speed Slider**: Adjust execution speed (0.1 Hz to 10 Hz)
 
+### Using I/O
+1. Type input in the I/O Panel input field (right side)
+2. Click "Send" or press Enter to queue the input
+3. Run your program - `IN` instructions will read the queued input
+4. Output from `OUT` instructions appears in the output display
+
 ## Development Roadmap
 
 See [IMPLEMENTATION_PLAN.md](dev-docs/IMPLEMENTATION_PLAN.md) for the complete 6-phase plan.
 
+### Completed Phases
+- **Phase 1**: Architecture Fix - ALU Integration ✅
+- **Phase 2**: I/O System ✅
+
 ### Upcoming Phases
-- **Phase 2**: I/O System (memory-mapped I/O, input/output panel)
 - **Phase 3**: Enhanced Instruction Set (logic, branching, stack operations)
 - **Phase 4**: BASIC-like Language (compiler, dual-editor view)
 - **Phase 5**: Advanced Debugging (dual-level execution tracking)
@@ -91,7 +112,8 @@ See [IMPLEMENTATION_PLAN.md](dev-docs/IMPLEMENTATION_PLAN.md) for the complete 6
 
 - [ARCHITECTURE.md](dev-docs/ARCHITECTURE.md) - System architecture and design
 - [IMPLEMENTATION_PLAN.md](dev-docs/IMPLEMENTATION_PLAN.md) - Detailed development plan
-- [CHANGELOG-Phase1.md](dev-docs/CHANGELOG-Phase1.md) - Phase 1 changes and decisions
+- [CHANGELOG-Phase1.md](dev-docs/CHANGELOG-Phase1.md) - Phase 1: Architecture Fix
+- [CHANGELOG-Phase2.md](dev-docs/CHANGELOG-Phase2.md) - Phase 2: I/O System
 
 ## Testing
 
