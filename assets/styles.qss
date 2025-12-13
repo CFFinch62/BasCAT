@@ -1,0 +1,54 @@
+/* Main Window */
+QMainWindow {
+    background-color: #0d0e15;
+}
+
+/* Dock Widgets */
+QDockWidget {
+    color: #00ff9d;
+    font-family: "Segoe UI", "Arial";
+    font-weight: bold;
+    titlebar-close-icon: url(:/icons/close.png);
+    titlebar-normal-icon: url(:/icons/float.png);
+}
+
+QDockWidget::title {
+    background: #1a1b25;
+    text-align: left;
+    padding-left: 10px;
+    border-bottom: 2px solid #00ff9d;
+}
+
+/* Code Editor */
+QPlainTextEdit {
+    background-color: #13141f;
+    color: #e0e0e0;
+    font-family: "Fira Code", "Consolas", "Monospace";
+    border: 1px solid #2d2f3d;
+    selection-background-color: #00ff9d;
+    selection-color: #000000;
+}
+
+/* Control Panel */
+QWidget#ControlPanel {
+    background-color: #1a1b25;
+}
+
+QPushButton {
+    background-color: #1a1b25;
+    color: #00ff9d;
+    border: 1px solid #00ff9d;
+    padding: 5px 15px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+QPushButton:hover {
+    background-color: #00ff9d;
+    color: #0d0e15;
+}
+
+QPushButton:pressed {
+    background-color: #00cc7a;
+}
