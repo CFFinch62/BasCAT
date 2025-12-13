@@ -134,6 +134,26 @@ class MemoryVisual(VisualComponent):
         size_width = self.size_text.boundingRect().width()
         self.size_text.setPos((120 - size_width) / 2, 35)
 
+class IOPortVisual(VisualComponent):
+    """Visual representation of I/O ports"""
+    def __init__(self, x, y):
+        super().__init__(x, y, 100, 70, "I/O", show_value=False)
+        self.setBrush(QBrush(QColor("#3a1a3a")))
+        self.setPen(QPen(QColor("#ff55ff"), 3))
+
+        # Add port labels
+        self.input_label = QGraphicsTextItem("IN: 0xFF", self)
+        self.input_label.setDefaultTextColor(QColor("#aaaaaa"))
+        input_font = QFont("Courier New", 8, QFont.Weight.Normal)
+        self.input_label.setFont(input_font)
+        self.input_label.setPos(10, 30)
+
+        self.output_label = QGraphicsTextItem("OUT: 0xFE", self)
+        self.output_label.setDefaultTextColor(QColor("#aaaaaa"))
+        output_font = QFont("Courier New", 8, QFont.Weight.Normal)
+        self.output_label.setFont(output_font)
+        self.output_label.setPos(10, 48)
+
 class BusVisual(QGraphicsItem):
     def __init__(self, path_points, label="Bus"):
         super().__init__()

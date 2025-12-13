@@ -29,7 +29,7 @@ class CircuitView(QGraphicsView):
             self.scene.addLine(0, y, self.scene.width(), y, pen)
 
     def setup_scene(self):
-        from src.gui.components.graphics import CPUVisual, RegisterVisual, MemoryVisual, BusVisual
+        from src.gui.components.graphics import CPUVisual, RegisterVisual, MemoryVisual, IOPortVisual, BusVisual
 
         # Layout constants - everything is positioned relative to buses
         LEFT_BUS_X = 130        # Data bus X position
@@ -145,7 +145,19 @@ class CircuitView(QGraphicsView):
         self.bus_mem_addr = BusVisual([(mem_x + MEM_WIDTH, mem_center_y), (RIGHT_BUS_X, mem_center_y)])
         self.scene.addItem(self.bus_mem_data)
         self.scene.addItem(self.bus_mem_addr)
-        
+
+        # ===== I/O PORTS (below memory) =====
+        IO_WIDTH = 100
+        IO_HEIGHT = 70
+        io_x = CENTER_X - IO_WIDTH / 2
+        self.io_port = IOPortVisual(io_x, 430)
+        self.scene.addItem(self.io_port)
+
+        # I/O port connections to buses
+        io_center_y = 430 + IO_HEIGHT / 2
+        self.bus_io_data = BusVisual([(io_x, io_center_y), (LEFT_BUS_X, io_center_y)])
+        self.scene.addItem(self.bus_io_data)
+
         # Connect signals
         from src.core.signals import signals
         signals.bus_transfer.connect(self.on_bus_transfer)
