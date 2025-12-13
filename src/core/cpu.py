@@ -93,6 +93,25 @@ class CPU:
             self.PC = addr
             signals.pc_updated.emit(self.PC)
 
+        elif opcode == 0x40:  # OUT Reg - Write register to OUTPUT port (0xFE)
+            reg_idx = self.fetch_byte()
+            reg_name = self._reg_name(reg_idx)
+            if reg_name:
+                value = self.registers[reg_name]
+                # Write to OUTPUT port address
+                self.memory.write(0xFE, value)
+                signals.bus_transfer.emit(reg_name, "I/O", value, "data")
+
+        elif opcode == 0x41:  # IN Reg - Read from INPUT port (0xFF) to register
+            reg_idx = self.fetch_byte()
+            reg_name = self._reg_name(reg_idx)
+            if reg_name:
+                # Read from INPUT port address
+                value = self.memory.read(0xFF)
+                self.registers[reg_name] = value
+                signals.register_updated.emit(reg_name, value)
+                signals.bus_transfer.emit("I/O", reg_name, value, "data")
+
         elif opcode == 0xFF:  # HALT
             self.halted = True
 

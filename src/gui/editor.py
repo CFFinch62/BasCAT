@@ -15,11 +15,12 @@ class CodeEditor(QWidget):
 
         self.layout.addWidget(self.editor)
 
-        # Default placeholder code
+        # Default placeholder code - demonstrates I/O
         self.editor.setPlainText(
-            "; CAL-EB Assembly\n"
-            "LOAD A, 10\n"
-            "ADD A, 5\n"
+            "; CAL-EB Assembly - I/O Demo\n"
+            "; Type input in the I/O panel, then run\n"
+            "IN A          ; Read input to register A\n"
+            "OUT A         ; Echo it back to output\n"
             "HALT\n"
         )
 

@@ -27,6 +27,14 @@ class ArchitectureSignals(QObject):
     # Emits the source line number being executed
     current_line_changed = pyqtSignal(int)  # line_number
 
+    # I/O signals
+    output_written = pyqtSignal(int)  # value (byte)
+    output_char_written = pyqtSignal(str)  # character
+    output_cleared = pyqtSignal()  # output buffer cleared
+    input_queued = pyqtSignal(int)  # value queued
+    input_consumed = pyqtSignal()  # input was read
+    input_requested = pyqtSignal()  # program tried to read but no input available
+
     def __init__(self):
         super().__init__()
 

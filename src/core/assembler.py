@@ -5,11 +5,13 @@ class Assembler:
     """
     OPCODES = {
         "NOP": 0x00,
-        "LOAD": 0x01, # LOAD Reg, Value
-        "ADD": 0x02,  # ADD Reg, Reg/Value
-        "SUB": 0x03,
-        "MOV": 0x04,  # MOV Dest, Source
-        "JMP": 0x10,  # JMP Address
+        "LOAD": 0x01,  # LOAD Reg, Value
+        "ADD": 0x02,   # ADD Reg, Reg/Value
+        "SUB": 0x03,   # SUB Reg, Value
+        "MOV": 0x04,   # MOV Dest, Source
+        "JMP": 0x10,   # JMP Address
+        "OUT": 0x40,   # OUT Reg - Write register to OUTPUT port (0xFE)
+        "IN": 0x41,    # IN Reg - Read from INPUT port (0xFF) to register
         "HALT": 0xFF
     }
     
@@ -79,7 +81,27 @@ class Assembler:
                         machine_code.append(int(val, 0) & 0xFF)
                     except ValueError:
                         return None, f"Invalid value {val}", {}
-                
+
+                elif op == "OUT":
+                    # OUT A - Write register A to OUTPUT port
+                    if len(parts) < 2:
+                        return None, "OUT requires a Register", {}
+                    reg = parts[1]
+                    if reg in Assembler.REGISTERS:
+                        machine_code.append(Assembler.REGISTERS[reg])
+                    else:
+                        return None, f"Unknown register {reg}", {}
+
+                elif op == "IN":
+                    # IN A - Read from INPUT port to register A
+                    if len(parts) < 2:
+                        return None, "IN requires a Register", {}
+                    reg = parts[1]
+                    if reg in Assembler.REGISTERS:
+                        machine_code.append(Assembler.REGISTERS[reg])
+                    else:
+                        return None, f"Unknown register {reg}", {}
+
                 elif op == "HALT":
                     pass
                     

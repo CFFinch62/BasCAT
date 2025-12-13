@@ -4,6 +4,7 @@ from PyQt6.QtCore import Qt
 from src.gui.circuit_view import CircuitView
 from src.gui.editor import CodeEditor
 from src.gui.controls import ControlPanel
+from src.gui.io_panel import IOPanel
 from src.core.sim_manager import SimManager
 
 class MainWindow(QMainWindow):
@@ -36,6 +37,12 @@ class MainWindow(QMainWindow):
         from src.core.signals import signals
         signals.current_line_changed.connect(self.editor.highlight_line)
 
+        # Connect I/O signals
+        self.io_panel.input_submitted.connect(self.on_input_submitted)
+        signals.output_written.connect(self.io_panel.display_byte)
+        signals.output_char_written.connect(self.io_panel.display_char)
+        signals.output_cleared.connect(self.io_panel.clear_output)
+
     def on_run(self):
         code = self.editor.get_code()
         if self.sim.load_code(code):
@@ -53,6 +60,11 @@ class MainWindow(QMainWindow):
         self.editor.clear_highlight()
         self.sim.reset()
 
+    def on_input_submitted(self, text):
+        """Handle input submitted from I/O panel"""
+        # Queue the input string to the I/O controller
+        self.sim.memory.io_controller.queue_string(text)
+
     def setup_docks(self):
         # Code Editor Dock (Left)
         self.editor_dock = QDockWidget("Assembly Editor", self)
@@ -67,6 +79,13 @@ class MainWindow(QMainWindow):
         self.control_panel = ControlPanel()
         self.control_dock.setWidget(self.control_panel)
         self.addDockWidget(Qt.DockWidgetArea.TopDockWidgetArea, self.control_dock)
+
+        # I/O Panel Dock (Right)
+        self.io_dock = QDockWidget("Input/Output", self)
+        self.io_dock.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.BottomDockWidgetArea)
+        self.io_panel = IOPanel()
+        self.io_dock.setWidget(self.io_panel)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.io_dock)
 
         # TODO: Memory Viewer Dock (Future Phase)
         # This will show a hex dump view of RAM contents for debugging
