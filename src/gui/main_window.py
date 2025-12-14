@@ -388,7 +388,7 @@ class MainWindow(QMainWindow):
         """Show assembly instruction reference"""
         self._show_help_document(
             "Assembly Instruction Reference",
-            os.path.join(os.path.dirname(__file__), "..", "..", "docs", "instruction_reference.md")
+            os.path.join(os.path.dirname(__file__), "..", "..", "docs", "assembly_guide.md")
         )
 
     def show_basic_guide(self):
