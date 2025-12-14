@@ -9,9 +9,33 @@ class Assembler:
         "ADD": 0x02,   # ADD Reg, Reg/Value
         "SUB": 0x03,   # SUB Reg, Value
         "MOV": 0x04,   # MOV Dest, Source
+
+        # Logic operations
+        "AND": 0x05,   # AND Reg, Reg/Value
+        "OR": 0x06,    # OR Reg, Reg/Value
+        "XOR": 0x07,   # XOR Reg, Reg/Value
+        "NOT": 0x08,   # NOT Reg
+
+        # Comparison and branching
+        "CMP": 0x09,   # CMP Reg, Reg/Value - Compare and set flags
         "JMP": 0x10,   # JMP Address
+        "JZ": 0x11,    # JZ Address - Jump if Zero
+        "JNZ": 0x12,   # JNZ Address - Jump if Not Zero
+        "JC": 0x13,    # JC Address - Jump if Carry
+        "JNC": 0x14,   # JNC Address - Jump if Not Carry
+
+        # Stack operations
+        "PUSH": 0x20,  # PUSH Reg
+        "POP": 0x21,   # POP Reg
+
+        # Memory operations
+        "LDM": 0x30,   # LDM Reg, [addr] - Load from memory
+        "STM": 0x31,   # STM [addr], Reg - Store to memory
+
+        # I/O operations
         "OUT": 0x40,   # OUT Reg - Write register to OUTPUT port (0xFE)
         "IN": 0x41,    # IN Reg - Read from INPUT port (0xFF) to register
+
         "HALT": 0xFF
     }
     
@@ -70,17 +94,124 @@ class Assembler:
                     except ValueError:
                         return None, f"Invalid value {val}", {}
 
-                elif op == "ADD":
-                    # ADD A, 5 (Immediate) - currently only supports adding to A
+                elif op == "ADD" or op == "SUB":
+                    # ADD/SUB Reg, Value (Immediate)
                     if len(parts) < 3:
-                        return None, "ADD requires Register and Value", {}
+                        return None, f"{op} requires Register and Value", {}
                     reg = parts[1]
                     val = parts[2]
-                    # Note: Currently ADD only works with register A in CPU
                     try:
                         machine_code.append(int(val, 0) & 0xFF)
                     except ValueError:
                         return None, f"Invalid value {val}", {}
+
+                elif op == "AND" or op == "OR" or op == "XOR":
+                    # Logic operations: AND/OR/XOR Reg, Value
+                    if len(parts) < 3:
+                        return None, f"{op} requires Register and Value", {}
+                    reg = parts[1]
+                    val = parts[2]
+                    try:
+                        machine_code.append(int(val, 0) & 0xFF)
+                    except ValueError:
+                        return None, f"Invalid value {val}", {}
+
+                elif op == "NOT":
+                    # NOT Reg
+                    if len(parts) < 2:
+                        return None, "NOT requires a Register", {}
+                    reg = parts[1]
+                    if reg in Assembler.REGISTERS:
+                        machine_code.append(Assembler.REGISTERS[reg])
+                    else:
+                        return None, f"Unknown register {reg}", {}
+
+                elif op == "CMP":
+                    # CMP Reg, Value - Compare register with value
+                    if len(parts) < 3:
+                        return None, "CMP requires Register and Value", {}
+                    reg = parts[1]
+                    if reg in Assembler.REGISTERS:
+                        machine_code.append(Assembler.REGISTERS[reg])
+                    else:
+                        return None, f"Unknown register {reg}", {}
+                    val = parts[2]
+                    try:
+                        machine_code.append(int(val, 0) & 0xFF)
+                    except ValueError:
+                        return None, f"Invalid value {val}", {}
+
+                elif op == "JMP" or op == "JZ" or op == "JNZ" or op == "JC" or op == "JNC":
+                    # Jump instructions: JMP/JZ/JNZ/JC/JNC Address
+                    if len(parts) < 2:
+                        return None, f"{op} requires an Address", {}
+                    addr = parts[1]
+                    try:
+                        machine_code.append(int(addr, 0) & 0xFF)
+                    except ValueError:
+                        return None, f"Invalid address {addr}", {}
+
+                elif op == "PUSH" or op == "POP":
+                    # Stack operations: PUSH/POP Reg
+                    if len(parts) < 2:
+                        return None, f"{op} requires a Register", {}
+                    reg = parts[1]
+                    if reg in Assembler.REGISTERS:
+                        machine_code.append(Assembler.REGISTERS[reg])
+                    else:
+                        return None, f"Unknown register {reg}", {}
+
+                elif op == "LDM":
+                    # LDM Reg, [addr] - Load from memory address
+                    if len(parts) < 3:
+                        return None, "LDM requires Register and [Address]", {}
+                    reg = parts[1]
+                    if reg in Assembler.REGISTERS:
+                        machine_code.append(Assembler.REGISTERS[reg])
+                    else:
+                        return None, f"Unknown register {reg}", {}
+                    # Parse address (might be [addr] or just addr)
+                    addr_str = parts[2].strip('[]')
+                    try:
+                        machine_code.append(int(addr_str, 0) & 0xFF)
+                    except ValueError:
+                        return None, f"Invalid address {addr_str}", {}
+
+                elif op == "STM":
+                    # STM [addr], Reg - Store to memory address
+                    if len(parts) < 3:
+                        return None, "STM requires [Address] and Register", {}
+                    # Parse address (might be [addr] or just addr)
+                    addr_str = parts[1].strip('[]')
+                    try:
+                        machine_code.append(int(addr_str, 0) & 0xFF)
+                    except ValueError:
+                        return None, f"Invalid address {addr_str}", {}
+                    reg = parts[2]
+                    if reg in Assembler.REGISTERS:
+                        machine_code.append(Assembler.REGISTERS[reg])
+                    else:
+                        return None, f"Unknown register {reg}", {}
+
+                elif op == "MOV":
+                    # MOV Dest, Source (both registers or immediate)
+                    if len(parts) < 3:
+                        return None, "MOV requires Destination and Source", {}
+                    dest = parts[1]
+                    src = parts[2]
+
+                    if dest not in Assembler.REGISTERS:
+                        return None, f"Unknown register {dest}", {}
+                    machine_code.append(Assembler.REGISTERS[dest])
+
+                    # Source can be register or immediate value
+                    if src in Assembler.REGISTERS:
+                        machine_code.append(0x80 | Assembler.REGISTERS[src])  # High bit = register
+                    else:
+                        try:
+                            machine_code.append(int(src, 0) & 0x7F)  # Low 7 bits = immediate value
+                        except ValueError:
+                            return None, f"Invalid source {src}", {}
 
                 elif op == "OUT":
                     # OUT A - Write register A to OUTPUT port

@@ -100,23 +100,28 @@ class CircuitView(QGraphicsView):
         self.pc = RegisterVisual(RIGHT_REG_X, 50, "PC")
         self.ir = RegisterVisual(RIGHT_REG_X, 50 + REG_SPACING, "IR")
         self.mar = RegisterVisual(RIGHT_REG_X, 50 + REG_SPACING * 2, "MAR")
+        self.sp = RegisterVisual(RIGHT_REG_X, 50 + REG_SPACING * 3, "SP")
 
         self.pc.set_value(0)
         self.ir.set_value(0)
         self.mar.set_value(0)
+        self.sp.set_value(0xFD)
 
         self.scene.addItem(self.pc)
         self.scene.addItem(self.ir)
         self.scene.addItem(self.mar)
+        self.scene.addItem(self.sp)
 
         # Connections from address bus to right registers
         self.bus_pc = BusVisual([(RIGHT_BUS_X, reg_center_y(0)), (RIGHT_REG_X, reg_center_y(0))])
         self.bus_ir = BusVisual([(RIGHT_BUS_X, reg_center_y(1)), (RIGHT_REG_X, reg_center_y(1))])
         self.bus_mar = BusVisual([(RIGHT_BUS_X, reg_center_y(2)), (RIGHT_REG_X, reg_center_y(2))])
+        self.bus_sp = BusVisual([(RIGHT_BUS_X, reg_center_y(3)), (RIGHT_REG_X, reg_center_y(3))])
 
         self.scene.addItem(self.bus_pc)
         self.scene.addItem(self.bus_ir)
         self.scene.addItem(self.bus_mar)
+        self.scene.addItem(self.bus_sp)
 
         # ===== CENTER: CPU Block (centered between buses) =====
         CPU_WIDTH = 200
@@ -165,6 +170,7 @@ class CircuitView(QGraphicsView):
         signals.pc_updated.connect(self.on_pc_updated)
         signals.ir_updated.connect(self.on_ir_updated)
         signals.mar_updated.connect(self.on_mar_updated)
+        signals.sp_updated.connect(self.on_sp_updated)
         signals.flags_updated.connect(self.on_flags_updated)
 
     def on_bus_transfer(self, source, dest, value, bus_type):
@@ -214,6 +220,10 @@ class CircuitView(QGraphicsView):
     def on_mar_updated(self, value):
         """Update MAR visual when memory address register changes"""
         self.mar.set_value(value)
+
+    def on_sp_updated(self, value):
+        """Update SP visual when stack pointer changes"""
+        self.sp.set_value(value)
 
     def on_flags_updated(self, flags_dict):
         """Update CPU flags display when ALU flags change"""

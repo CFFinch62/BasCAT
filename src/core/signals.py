@@ -15,6 +15,7 @@ class ArchitectureSignals(QObject):
     pc_updated = pyqtSignal(int)
     mar_updated = pyqtSignal(int)
     ir_updated = pyqtSignal(int)
+    sp_updated = pyqtSignal(int)
 
     # ALU flags update (for visualization)
     flags_updated = pyqtSignal(dict)  # flags dictionary {'Z': 0/1, 'N': 0/1, 'C': 0/1, 'O': 0/1}

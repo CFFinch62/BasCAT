@@ -21,17 +21,18 @@ def test_alu_add():
 def test_cpu_fetch():
     mem = Memory()
     cpu = CPU(mem)
-    
-    # Load instruction 0x12 into address 0x00
-    mem.write(0x00, 0x12)
-    
+
+    # Load NOP instruction (0x00) into address 0x00
+    mem.write(0x00, 0x00)
+
     # Reset CPU (PC=0)
     cpu.reset()
-    
-    # Fetch
+
+    # Fetch (executes the instruction)
     opcode = cpu.fetch()
-    
-    assert opcode == 0x12
+
+    # After executing NOP, IR should be 0x00 and PC should be 1
+    assert cpu.IR == 0x00
     assert cpu.PC == 1
 
 if __name__ == "__main__":

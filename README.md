@@ -10,29 +10,38 @@ BasCAT is designed to teach computer architecture by providing:
 - **Interactive Debugging**: Step through code and watch the circuit animate in real-time
 - **Educational Accuracy**: Proper architectural hierarchy (ALU inside CPU, etc.)
 
-## Current Status: Phase 2 Complete ✅
+## Current Status: Phase 3 Complete ✅
 
 ### What's Working
 - **Circuit Visualization**: Interactive view showing CPU (with embedded ALU), registers, RAM, I/O ports, and buses
-- **Assembly Programming**: Instruction set with I/O support (LOAD, ADD, SUB, JMP, IN, OUT, HALT)
+- **Enhanced Instruction Set**: 23 instructions including logic operations, conditional branching, stack operations, and memory access
 - **Interactive I/O System**: Memory-mapped I/O allowing programs to accept input and display output
 - **I/O Panel**: Dedicated GUI panel for user input/output interaction
 - **Execution Control**: Run, step, and reset with adjustable clock speed
-- **Real-time Animation**: Bus transfers, register updates, and I/O operations visualized
+- **Real-time Animation**: Bus transfers, register updates, I/O operations, and stack operations visualized
 - **ALU Flags Display**: Shows Zero, Negative, Carry, and Overflow flags
-- **Example Programs**: 3 example programs demonstrating I/O capabilities
+- **Example Programs**: 9 example programs demonstrating all features
 
 ### Architecture
 - **CPU**: 8-bit with embedded ALU
   - General Purpose Registers: A, B, C, D (8-bit)
-  - Special Registers: PC (16-bit), IR (8-bit), MAR (16-bit)
+  - Special Registers: PC (16-bit), IR (8-bit), MAR (16-bit), SP (8-bit)
   - ALU with flags: Z, N, C, O
 - **RAM**: 256 bytes
-  - 0x00-0xFD: General RAM
+  - 0x00-0xFD: General RAM + Stack (253 bytes)
   - 0xFE: OUTPUT port (memory-mapped I/O)
   - 0xFF: INPUT port (memory-mapped I/O)
+- **Stack**: Grows downward from 0xFD, managed by SP register
 - **I/O System**: Memory-mapped I/O controller with input queue and output buffer
 - **Buses**: Data bus and Address bus with visual animations
+
+### Instruction Set (23 total)
+- **Arithmetic & Logic**: NOP, ADD, SUB, AND, OR, XOR, NOT
+- **Data Movement**: LOAD, MOV, LDM, STM
+- **Control Flow**: CMP, JMP, JZ, JNZ, JC, JNC
+- **Stack**: PUSH, POP
+- **I/O**: IN, OUT
+- **System**: HALT
 
 ## Installation
 
@@ -69,18 +78,28 @@ Or use the convenience script:
 
 ### Writing Assembly Code
 
-Example program with I/O:
+Example program with loops:
 ```assembly
-; Echo program - reads input and echoes to output
-IN A          ; Read character from input to register A
-OUT A         ; Write register A to output
-HALT          ; Stop execution
+; Count from 0 to 9
+LOAD A, 0
+loop:
+    OUT A         ; Output current number
+    ADD A, 1      ; Increment
+    CMP A, 10     ; Compare with limit
+    JNZ loop      ; Jump if not zero
+HALT
 ```
 
 More examples in the [examples/](examples/) directory:
 - `01_echo.asm` - Simple echo program
 - `02_add_numbers.asm` - Sequential input demonstration
 - `03_hello_world.asm` - Outputs "HI"
+- `04_logic_operations.asm` - Logic operations (AND, OR, XOR, NOT)
+- `05_conditional_loop.asm` - Conditional loop using CMP and JNZ
+- `06_stack_demo.asm` - Stack operations (PUSH/POP)
+- `07_memory_operations.asm` - Memory access (LDM/STM)
+- `08_mov_register.asm` - MOV instruction variants
+- `09_complex_program.asm` - Complex accumulator with input loop
 
 ### Controls
 - **Run**: Execute the program continuously at the selected speed
@@ -101,9 +120,9 @@ See [IMPLEMENTATION_PLAN.md](dev-docs/IMPLEMENTATION_PLAN.md) for the complete 6
 ### Completed Phases
 - **Phase 1**: Architecture Fix - ALU Integration ✅
 - **Phase 2**: I/O System ✅
+- **Phase 3**: Enhanced Instruction Set ✅
 
 ### Upcoming Phases
-- **Phase 3**: Enhanced Instruction Set (logic, branching, stack operations)
 - **Phase 4**: BASIC-like Language (compiler, dual-editor view)
 - **Phase 5**: Advanced Debugging (dual-level execution tracking)
 - **Phase 6**: Polish (examples, tutorials, documentation)
@@ -114,6 +133,7 @@ See [IMPLEMENTATION_PLAN.md](dev-docs/IMPLEMENTATION_PLAN.md) for the complete 6
 - [IMPLEMENTATION_PLAN.md](dev-docs/IMPLEMENTATION_PLAN.md) - Detailed development plan
 - [CHANGELOG-Phase1.md](dev-docs/CHANGELOG-Phase1.md) - Phase 1: Architecture Fix
 - [CHANGELOG-Phase2.md](dev-docs/CHANGELOG-Phase2.md) - Phase 2: I/O System
+- [CHANGELOG-Phase3.md](dev-docs/CHANGELOG-Phase3.md) - Phase 3: Enhanced Instruction Set
 
 ## Testing
 
@@ -122,10 +142,11 @@ source venv/bin/activate
 python -m pytest tests/ -v
 ```
 
-Current test coverage:
+Current test coverage (15 tests, all passing):
 - Core memory operations
-- ALU arithmetic
+- ALU arithmetic and logic operations
 - CPU instruction fetch/execute
+- All Phase 3 instructions (logic, branching, stack, memory)
 - Simulation manager
 
 ## Project Structure
