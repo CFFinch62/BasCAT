@@ -1,0 +1,9 @@
+10 REM Maximum Finder
+20 REM Finds maximum of two numbers
+30 INPUT A
+40 INPUT B
+50 IF A > B THEN GOTO 80
+60 PRINT B
+70 GOTO 90
+80 PRINT A
+90 END

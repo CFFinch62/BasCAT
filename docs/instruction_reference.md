@@ -1,0 +1,504 @@
+# BasCAT Assembly Instruction Reference
+
+Complete reference for all 23 assembly instructions supported by BasCAT.
+
+---
+
+## Data Movement Instructions
+
+### LOAD reg, value
+**Opcode**: 0x01
+
+Loads an immediate value into a register.
+
+**Format**: `LOAD A, 42`
+
+**Example**:
+```assembly
+LOAD A, 10    ; Load 10 into register A
+LOAD B, 255   ; Load 255 into register B
+```
+
+**Flags**: None affected
+
+---
+
+### MOV dest, src
+**Opcode**: 0x10
+
+Moves data between registers or from immediate value to register.
+
+**Formats**:
+- `MOV A, B` - Copy register B to register A
+- `MOV A, 5` - Load immediate value 5 into register A
+
+**Example**:
+```assembly
+LOAD A, 10
+MOV B, A      ; Copy A to B (B now contains 10)
+MOV C, 20     ; Load 20 into C
+```
+
+**Flags**: None affected
+
+---
+
+### LDM reg, [address]
+**Opcode**: 0x0F
+
+Load from memory address into register.
+
+**Format**: `LDM A, [50]` or `LDM A, 50`
+
+**Example**:
+```assembly
+LDM A, 10     ; Load value from memory address 10 into A
+LDM B, 254    ; Load from I/O port (address 254)
+```
+
+**Flags**: None affected
+
+---
+
+### STM [address], reg
+**Opcode**: 0x11
+
+Store register value to memory address.
+
+**Format**: `STM [50], A` or `STM 50, A`
+
+**Example**:
+```assembly
+LOAD A, 42
+STM 100, A    ; Store value 42 to memory address 100
+STM 254, A    ; Write to output port
+```
+
+**Flags**: None affected
+
+---
+
+## Arithmetic Instructions
+
+### ADD reg, value
+**Opcode**: 0x02
+
+Adds a value to a register.
+
+**Format**: `ADD A, 5`
+
+**Example**:
+```assembly
+LOAD A, 10
+ADD A, 5      ; A = 15
+```
+
+**Flags**: Z (if result is 0), C (if overflow), O (if overflow), N (if negative)
+
+---
+
+### SUB reg, value
+**Opcode**: 0x03
+
+Subtracts a value from a register.
+
+**Format**: `SUB A, 3`
+
+**Example**:
+```assembly
+LOAD A, 10
+SUB A, 3      ; A = 7
+```
+
+**Flags**: Z, C, O, N
+
+---
+
+### CMP reg, value
+**Opcode**: 0x0D
+
+Compares register with value (performs subtraction but doesn't store result).
+
+**Format**: `CMP A, 10`
+
+**Example**:
+```assembly
+LOAD A, 15
+CMP A, 10     ; Sets flags based on A - 10
+JZ equal      ; Jump if A == 10
+```
+
+**Flags**: Z (if equal), C (if reg < value), N
+
+**Used with**: JZ, JNZ, JC, JNC
+
+---
+
+## Logical Instructions
+
+### AND reg, value
+**Opcode**: 0x09
+
+Bitwise AND operation.
+
+**Format**: `AND A, 15`
+
+**Example**:
+```assembly
+LOAD A, 0b11110000
+AND A, 0b00001111  ; A = 0b00000000 (result: 0)
+```
+
+**Flags**: Z, N
+
+---
+
+### OR reg, value
+**Opcode**: 0x0A
+
+Bitwise OR operation.
+
+**Format**: `OR A, 8`
+
+**Example**:
+```assembly
+LOAD A, 0b00001111
+OR A, 0b11110000   ; A = 0b11111111 (result: 255)
+```
+
+**Flags**: Z, N
+
+---
+
+### XOR reg, value
+**Opcode**: 0x0B
+
+Bitwise XOR (exclusive OR) operation.
+
+**Format**: `XOR A, 255`
+
+**Example**:
+```assembly
+LOAD A, 0b10101010
+XOR A, 0b11111111  ; A = 0b01010101 (flips all bits)
+```
+
+**Flags**: Z, N
+
+---
+
+### NOT reg
+**Opcode**: 0x0C
+
+Bitwise NOT operation (inverts all bits).
+
+**Format**: `NOT A`
+
+**Example**:
+```assembly
+LOAD A, 0b00001111
+NOT A             ; A = 0b11110000
+```
+
+**Flags**: Z, N
+
+---
+
+## Control Flow Instructions
+
+### JMP address
+**Opcode**: 0x04
+
+Unconditional jump to address.
+
+**Format**: `JMP 100` or `JMP loop_start`
+
+**Example**:
+```assembly
+JMP start
+; ... code ...
+start:
+  LOAD A, 10
+```
+
+**Flags**: None affected
+
+---
+
+### JZ address
+**Opcode**: 0x0E
+
+Jump if Zero flag is set (result was zero).
+
+**Format**: `JZ target`
+
+**Example**:
+```assembly
+LOAD A, 10
+CMP A, 10
+JZ equal      ; Jumps because 10 == 10
+equal:
+  LOAD B, 1
+```
+
+**Flags**: None affected
+**Condition**: Z flag = 1
+
+---
+
+### JNZ address
+**Opcode**: 0x12
+
+Jump if Zero flag is clear (result was not zero).
+
+**Format**: `JNZ target`
+
+**Example**:
+```assembly
+loop:
+  SUB A, 1
+  JNZ loop    ; Keep looping while A != 0
+```
+
+**Flags**: None affected
+**Condition**: Z flag = 0
+
+---
+
+### JC address
+**Opcode**: 0x13
+
+Jump if Carry flag is set.
+
+**Format**: `JC overflow`
+
+**Example**:
+```assembly
+LOAD A, 255
+ADD A, 1
+JC overflow   ; Jumps because 255+1 overflows
+```
+
+**Flags**: None affected
+**Condition**: C flag = 1
+
+---
+
+### JNC address
+**Opcode**: 0x14
+
+Jump if Carry flag is clear.
+
+**Format**: `JNC no_overflow`
+
+**Example**:
+```assembly
+LOAD A, 10
+ADD A, 5
+JNC no_overflow  ; Jumps because no overflow
+```
+
+**Flags**: None affected
+**Condition**: C flag = 0
+
+---
+
+## Stack Instructions
+
+### PUSH reg
+**Opcode**: 0x15
+
+Push register value onto stack.
+
+**Format**: `PUSH A`
+
+**Example**:
+```assembly
+LOAD A, 42
+PUSH A        ; Save A on stack
+LOAD A, 99
+POP A         ; Restore A (A = 42 again)
+```
+
+**Flags**: None affected
+**Side Effect**: SP decremented
+
+---
+
+### POP reg
+**Opcode**: 0x16
+
+Pop value from stack into register.
+
+**Format**: `POP A`
+
+**Example**:
+```assembly
+PUSH A
+PUSH B
+; ... do work ...
+POP B
+POP A         ; Restore in reverse order
+```
+
+**Flags**: None affected
+**Side Effect**: SP incremented
+
+---
+
+## I/O Instructions
+
+### IN reg
+**Opcode**: 0x06
+
+Read from input port (address 0xFF) into register.
+
+**Format**: `IN A`
+
+**Example**:
+```assembly
+IN A          ; Read user input into A
+OUT A         ; Echo it back
+```
+
+**Flags**: None affected
+**Note**: Blocks until input is available
+
+---
+
+### OUT reg
+**Opcode**: 0x07
+
+Write register value to output port (address 0xFE).
+
+**Format**: `OUT A`
+
+**Example**:
+```assembly
+LOAD A, 65    ; ASCII 'A'
+OUT A         ; Display 'A'
+```
+
+**Flags**: None affected
+
+---
+
+## System Instructions
+
+### HALT
+**Opcode**: 0x05
+
+Stops program execution.
+
+**Format**: `HALT`
+
+**Example**:
+```assembly
+LOAD A, 10
+OUT A
+HALT          ; End program
+```
+
+**Flags**: None affected
+**Effect**: Sets CPU halted flag, stops clock
+
+---
+
+### NOP
+**Opcode**: 0x00
+
+No operation (does nothing).
+
+**Format**: `NOP`
+
+**Example**:
+```assembly
+NOP           ; Placeholder or timing delay
+NOP
+LOAD A, 10
+```
+
+**Flags**: None affected
+
+---
+
+## Flags Register
+
+The CPU maintains four status flags:
+
+- **Z (Zero)**: Set when result is 0
+- **N (Negative)**: Set when result is negative (bit 7 = 1)
+- **C (Carry)**: Set on arithmetic overflow/carry
+- **O (Overflow)**: Set on signed overflow
+
+**Instructions that affect flags**: ADD, SUB, CMP, AND, OR, XOR, NOT
+
+**Instructions that use flags**: JZ, JNZ, JC, JNC
+
+---
+
+## Memory Map
+
+| Address Range | Usage |
+|---------------|-------|
+| 0x00 - 0xFC | User program and data (253 bytes) |
+| 0xFD | Stack Pointer (SP) |
+| 0xFE | Output Port |
+| 0xFF | Input Port |
+
+---
+
+## Example Programs
+
+### Hello World (Output 72)
+```assembly
+LOAD A, 72    ; ASCII 'H'
+OUT A
+HALT
+```
+
+### Count to 5
+```assembly
+LOAD A, 0
+loop:
+  OUT A
+  ADD A, 1
+  CMP A, 6
+  JNZ loop
+HALT
+```
+
+### Echo Input
+```assembly
+loop:
+  IN A
+  OUT A
+  JMP loop
+```
+
+### Addition
+```assembly
+LOAD A, 5
+LOAD B, 3
+ADD A, B      ; Note: ADD only takes immediate, so use memory
+STM 10, A
+STM 11, B
+LDM A, 10
+; For proper addition, load to temp memory
+HALT
+```
+
+---
+
+## Programming Tips
+
+1. **Use labels** instead of absolute addresses: `JMP loop` not `JMP 10`
+2. **Save registers** with PUSH/POP before subroutines
+3. **Check flags** after CMP before conditional jumps
+4. **Memory-mapped I/O**: 0xFE (OUT), 0xFF (IN)
+5. **Stack grows down**: SP starts at 0xFD, decrements on PUSH
+6. **Comments**: Use `;` for comments in your code
+
+---
+
+*BasCAT Assembly Language - Version 1.0*

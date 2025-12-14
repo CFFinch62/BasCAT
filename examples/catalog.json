@@ -1,0 +1,98 @@
+{
+  "examples": [
+    {
+      "id": "hello_world",
+      "title": "Hello World",
+      "category": "Basics",
+      "difficulty": "Beginner",
+      "file": "basic/01_hello_world.bas",
+      "description": "Your first program! Outputs the number 72 (ASCII code for 'H').",
+      "concepts": ["PRINT", "END"]
+    },
+    {
+      "id": "addition",
+      "title": "Simple Addition",
+      "category": "Basics",
+      "difficulty": "Beginner",
+      "file": "basic/02_addition.bas",
+      "description": "Learn variables and arithmetic by adding two numbers.",
+      "concepts": ["LET", "Variables", "Arithmetic"]
+    },
+    {
+      "id": "input_echo",
+      "title": "Input Echo",
+      "category": "I/O",
+      "difficulty": "Beginner",
+      "file": "basic/03_input_echo.bas",
+      "description": "Read user input and echo it back. Demonstrates I/O operations.",
+      "concepts": ["INPUT", "PRINT", "GOTO", "Infinite loop"]
+    },
+    {
+      "id": "counter",
+      "title": "Counter Loop",
+      "category": "Loops",
+      "difficulty": "Beginner",
+      "file": "basic/04_counter.bas",
+      "description": "Count from 0 to 5 using a FOR loop.",
+      "concepts": ["FOR", "NEXT", "Loop variable"]
+    },
+    {
+      "id": "conditional",
+      "title": "Conditional Test",
+      "category": "Control Flow",
+      "difficulty": "Intermediate",
+      "file": "basic/05_conditional.bas",
+      "description": "Check if input is greater than 50 and print 1 or 0.",
+      "concepts": ["IF", "THEN", "GOTO", "Comparison"]
+    },
+    {
+      "id": "accumulator",
+      "title": "Accumulator",
+      "category": "Math",
+      "difficulty": "Intermediate",
+      "file": "basic/06_accumulator.bas",
+      "description": "Add numbers until total exceeds 100. Demonstrates accumulation pattern.",
+      "concepts": ["Variables", "INPUT", "Addition", "Conditional loop"]
+    },
+    {
+      "id": "countdown",
+      "title": "Countdown",
+      "category": "Loops",
+      "difficulty": "Intermediate",
+      "file": "basic/07_countdown.bas",
+      "description": "Count down from 10 to 0. Shows manual loop control.",
+      "concepts": ["Variables", "Subtraction", "Conditional GOTO"]
+    },
+    {
+      "id": "max_finder",
+      "title": "Maximum Finder",
+      "category": "Math",
+      "difficulty": "Intermediate",
+      "file": "basic/08_max_finder.bas",
+      "description": "Find the maximum of two numbers using conditionals.",
+      "concepts": ["INPUT", "Comparison", "Branching"]
+    }
+  ],
+  "categories": [
+    {
+      "name": "Basics",
+      "description": "Fundamental programming concepts"
+    },
+    {
+      "name": "I/O",
+      "description": "Input and output operations"
+    },
+    {
+      "name": "Loops",
+      "description": "Iteration and repetition"
+    },
+    {
+      "name": "Control Flow",
+      "description": "Conditional execution and branching"
+    },
+    {
+      "name": "Math",
+      "description": "Mathematical operations and algorithms"
+    }
+  ]
+}

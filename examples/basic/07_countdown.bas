@@ -1,0 +1,8 @@
+10 REM Countdown
+20 REM Counts down from 10 to 0
+30 LET A = 10
+40 PRINT A
+50 LET A = A - 1
+60 IF A > 0 THEN GOTO 40
+70 PRINT 0
+80 END

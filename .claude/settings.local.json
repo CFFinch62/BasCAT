@@ -8,7 +8,12 @@
       "Bash(python -m pytest:*)",
       "Bash(git init:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(python src/compiler/compiler.py:*)",
+      "Bash(python:*)",
+      "Bash(PYTHONPATH=. python3:*)",
+      "Bash(mkdir:*)",
+      "Bash(PYTHONPATH=. timeout 3 python3:*)"
     ]
   }
 }
