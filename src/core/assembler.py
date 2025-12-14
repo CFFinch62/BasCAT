@@ -46,27 +46,61 @@ class Assembler:
     def assemble(source_code):
         """
         Converts assembly source string to a list of bytes (machine code).
+        Two-pass assembler: Pass 1 finds labels, Pass 2 generates code.
         Returns (byte_list, error_message, line_map)
         line_map is a dict mapping memory_address -> source_line_number
         """
         lines = source_code.splitlines()
         machine_code = []
-        labels = {}
+        labels = {}  # Maps label names to addresses
         line_map = {}  # Maps memory address to source line number
 
-        # Pass 1: Find labels (simplified - assumption: label is "Name:")
-        # Ideally we'd do strict parsing, but for now we skip label storage logic
-        # and just focus on straightforward instruction parsing.
-
+        # PASS 1: Find all labels and their addresses
+        current_address = 0
         for line_num, line in enumerate(lines):
-            line = line.split(';')[0].strip().upper() # Remove comments
+            line = line.split(';')[0].strip()  # Remove comments
             if not line:
                 continue
-            
-            parts = line.replace(',', ' ').split()
+
+            # Check if this line is a label (ends with :)
+            if line.endswith(':'):
+                label_name = line[:-1].strip().upper()
+                labels[label_name] = current_address
+                continue
+
+            # Count instruction size to track addresses
+            parts = line.upper().replace(',', ' ').split()
             if not parts:
                 continue
-                
+
+            op = parts[0]
+            if op in Assembler.OPCODES:
+                # Calculate how many bytes this instruction will take
+                current_address += 1  # Opcode byte
+
+                # Add operand bytes
+                if op in ("LOAD", "CMP", "LDM", "STM", "MOV"):
+                    current_address += 2  # register + value/address
+                elif op in ("ADD", "SUB", "AND", "OR", "XOR", "JMP", "JZ", "JNZ", "JC", "JNC"):
+                    current_address += 1  # single operand
+                elif op in ("NOT", "PUSH", "POP", "OUT", "IN"):
+                    current_address += 1  # single register
+                # HALT and NOP have no operands
+
+        # PASS 2: Generate machine code
+        for line_num, line in enumerate(lines):
+            line = line.split(';')[0].strip()  # Remove comments
+            if not line:
+                continue
+
+            # Skip label definitions
+            if line.endswith(':'):
+                continue
+
+            parts = line.upper().replace(',', ' ').split()
+            if not parts:
+                continue
+
             op = parts[0]
             if op in Assembler.OPCODES:
                 # Map this memory address to the source line number
@@ -142,14 +176,20 @@ class Assembler:
                         return None, f"Invalid value {val}", {}
 
                 elif op == "JMP" or op == "JZ" or op == "JNZ" or op == "JC" or op == "JNC":
-                    # Jump instructions: JMP/JZ/JNZ/JC/JNC Address
+                    # Jump instructions: JMP/JZ/JNZ/JC/JNC Address or Label
                     if len(parts) < 2:
-                        return None, f"{op} requires an Address", {}
-                    addr = parts[1]
-                    try:
-                        machine_code.append(int(addr, 0) & 0xFF)
-                    except ValueError:
-                        return None, f"Invalid address {addr}", {}
+                        return None, f"{op} requires an Address or Label", {}
+                    addr_or_label = parts[1]
+
+                    # Check if it's a label
+                    if addr_or_label in labels:
+                        machine_code.append(labels[addr_or_label] & 0xFF)
+                    else:
+                        # Try to parse as numeric address
+                        try:
+                            machine_code.append(int(addr_or_label, 0) & 0xFF)
+                        except ValueError:
+                            return None, f"Undefined label or invalid address: {addr_or_label}", {}
 
                 elif op == "PUSH" or op == "POP":
                     # Stack operations: PUSH/POP Reg
