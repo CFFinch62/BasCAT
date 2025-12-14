@@ -362,7 +362,20 @@ class MainWindow(QMainWindow):
             msg.setDefaultButton(QMessageBox.StandardButton.Yes)
 
             if msg.exec() == QMessageBox.StandardButton.Yes:
-                self.dual_editor.basic_editor.set_code(code)
+                # Check if this is an assembly or BASIC example
+                is_assembly = example['file'].endswith('.asm')
+
+                if is_assembly:
+                    # Load directly into assembly editor, clear BASIC editor
+                    self.dual_editor.basic_editor.set_code("")
+                    self.dual_editor.assembly_editor.set_code(code)
+                    self.dual_editor.compiled_assembly = code
+                else:
+                    # Load into BASIC editor (normal flow)
+                    self.dual_editor.basic_editor.set_code(code)
+                    self.dual_editor.assembly_editor.set_code("")
+                    self.dual_editor.compiled_assembly = ""
+
                 self.current_file = None
                 self.setWindowTitle(f"BasCAT - {example['title']} (Example)")
                 self.on_reset()

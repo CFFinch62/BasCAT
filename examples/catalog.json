@@ -40,7 +40,7 @@
       "id": "conditional",
       "title": "Conditional Test",
       "category": "Control Flow",
-      "difficulty": "Intermediate",
+      "difficulty": "Beginner",
       "file": "basic/05_conditional.bas",
       "description": "Check if input is greater than 50 and print 1 or 0.",
       "concepts": ["IF", "THEN", "GOTO", "Comparison"]
@@ -71,6 +71,87 @@
       "file": "basic/08_max_finder.bas",
       "description": "Find the maximum of two numbers using conditionals.",
       "concepts": ["INPUT", "Comparison", "Branching"]
+    },
+    {
+      "id": "asm_echo",
+      "title": "[ASM] Echo Input",
+      "category": "Assembly",
+      "difficulty": "Beginner",
+      "file": "assembly/01_echo.asm",
+      "description": "Assembly: Read input and echo it back. Demonstrates IN and OUT instructions.",
+      "concepts": ["IN", "OUT", "JMP", "Labels"]
+    },
+    {
+      "id": "asm_add",
+      "title": "[ASM] Add Two Numbers",
+      "category": "Assembly",
+      "difficulty": "Beginner",
+      "file": "assembly/02_add_numbers.asm",
+      "description": "Assembly: Add two numbers using memory and registers.",
+      "concepts": ["LOAD", "ADD", "STM", "LDM"]
+    },
+    {
+      "id": "asm_hello",
+      "title": "[ASM] Hello World",
+      "category": "Assembly",
+      "difficulty": "Beginner",
+      "file": "assembly/03_hello_world.asm",
+      "description": "Assembly: Output 'HI' using ASCII codes. Your first assembly program!",
+      "concepts": ["LOAD", "OUT", "HALT"]
+    },
+    {
+      "id": "asm_logic",
+      "title": "[ASM] Logic Operations",
+      "category": "Assembly",
+      "difficulty": "Intermediate",
+      "file": "assembly/04_logic_operations.asm",
+      "description": "Assembly: Demonstrates AND, OR, XOR, NOT bitwise operations.",
+      "concepts": ["AND", "OR", "XOR", "NOT", "Bitwise operations"]
+    },
+    {
+      "id": "asm_conditional",
+      "title": "[ASM] Conditional Loop",
+      "category": "Assembly",
+      "difficulty": "Intermediate",
+      "file": "assembly/05_conditional_loop.asm",
+      "description": "Assembly: Count to 10 using CMP and JNZ for conditional looping.",
+      "concepts": ["CMP", "JNZ", "Loops", "Labels"]
+    },
+    {
+      "id": "asm_stack",
+      "title": "[ASM] Stack Demo",
+      "category": "Assembly",
+      "difficulty": "Advanced",
+      "file": "assembly/06_stack_demo.asm",
+      "description": "Assembly: Demonstrates PUSH and POP stack operations. Shows how to save and restore register values.",
+      "concepts": ["PUSH", "POP", "Stack", "Stack Pointer"]
+    },
+    {
+      "id": "asm_memory",
+      "title": "[ASM] Memory Operations",
+      "category": "Assembly",
+      "difficulty": "Intermediate",
+      "file": "assembly/07_memory_operations.asm",
+      "description": "Assembly: Shows LDM and STM for loading and storing values in memory.",
+      "concepts": ["LDM", "STM", "Memory addressing"]
+    },
+    {
+      "id": "asm_mov",
+      "title": "[ASM] MOV Register",
+      "category": "Assembly",
+      "difficulty": "Intermediate",
+      "file": "assembly/08_mov_register.asm",
+      "description": "Assembly: Demonstrates MOV instruction for copying data between registers.",
+      "concepts": ["MOV", "Registers", "Data movement"]
+    },
+    {
+      "id": "asm_complex",
+      "title": "[ASM] Complex Program",
+      "category": "Assembly",
+      "difficulty": "Advanced",
+      "file": "assembly/09_complex_program.asm",
+      "description": "Assembly: Combines multiple concepts - input, arithmetic, logic, loops, and output.",
+      "concepts": ["All instructions", "Complex logic", "Full program"]
     }
   ],
   "categories": [
@@ -93,6 +174,10 @@
     {
       "name": "Math",
       "description": "Mathematical operations and algorithms"
+    },
+    {
+      "name": "Assembly",
+      "description": "Low-level assembly language programs"
     }
   ]
 }
