@@ -7,7 +7,6 @@ import json
 import os
 
 from src.gui.circuit_view import CircuitView
-from src.gui.editor import CodeEditor
 from src.gui.dual_editor import DualEditor
 from src.gui.controls import ControlPanel
 from src.gui.io_panel import IOPanel

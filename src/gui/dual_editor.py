@@ -95,8 +95,12 @@ class SingleEditor(QWidget):
         """Clear any line highlighting"""
         self.current_highlight_line = -1
         self.editor.setExtraSelections([])
-        # Force visual update
-        self.editor.viewport().update()
+        # Move cursor to start to fully clear visual highlighting state
+        cursor = self.editor.textCursor()
+        cursor.movePosition(cursor.MoveOperation.Start)
+        self.editor.setTextCursor(cursor)
+        # Force immediate repaint
+        self.editor.viewport().repaint()
 
 
 class DualEditor(QWidget):
