@@ -29,6 +29,26 @@ QPlainTextEdit {
     selection-color: #000000;
 }
 
+/* I/O Text Boxes - Bright text for visibility */
+QTextEdit {
+    background-color: #13141f;
+    color: #f0f0f0;
+    font-family: "Fira Code", "Consolas", "Monospace";
+    border: 1px solid #2d2f3d;
+    selection-background-color: #00ff9d;
+    selection-color: #000000;
+}
+
+QLineEdit {
+    background-color: #13141f;
+    color: #f0f0f0;
+    font-family: "Fira Code", "Consolas", "Monospace";
+    border: 1px solid #2d2f3d;
+    padding: 5px;
+    selection-background-color: #00ff9d;
+    selection-color: #000000;
+}
+
 /* Control Panel */
 QWidget#ControlPanel {
     background-color: #1a1b25;
