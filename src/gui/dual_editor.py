@@ -1,8 +1,12 @@
 """
 Dual Editor Widget for Phase 5
 
-Displays BASIC code (editable) and generated Assembly code (read-only) side-by-side.
+Displays BASIC code (editable) and generated Assembly code side-by-side.
 Provides synchronized highlighting during execution.
+
+Mode behavior:
+- BASIC Mode: Shows BASIC editor, assembly hidden until compiled (with toggle)
+- Assembly Mode: Shows only assembly editor (editable), BASIC hidden
 """
 
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QSplitter,
@@ -50,6 +54,18 @@ class SingleEditor(QWidget):
         """Set editor contents"""
         self.editor.setPlainText(code)
 
+    def set_read_only(self, read_only):
+        """Set read-only state"""
+        self.editor.setReadOnly(read_only)
+        if read_only:
+            self.editor.setStyleSheet("background-color: #2a2a2a;")
+        else:
+            self.editor.setStyleSheet("")
+
+    def set_title(self, title):
+        """Update the title label"""
+        self.title_label.setText(title)
+
     def highlight_line(self, line_number):
         """Highlight the specified line number (0-based)"""
         self.current_highlight_line = line_number
@@ -79,17 +95,17 @@ class SingleEditor(QWidget):
         """Clear any line highlighting"""
         self.current_highlight_line = -1
         self.editor.setExtraSelections([])
+        # Force visual update
+        self.editor.viewport().update()
 
 
 class DualEditor(QWidget):
     """
     Dual-pane editor showing BASIC and Assembly code side-by-side.
 
-    Features:
-    - Left pane: BASIC code (editable)
-    - Right pane: Assembly code (read-only, generated from BASIC)
-    - Compile button to generate assembly from BASIC
-    - Synchronized highlighting during execution
+    Mode behavior:
+    - BASIC Mode: BASIC editor visible; assembly toggleable (hidden by default until compiled)
+    - Assembly Mode: Only assembly editor visible (editable)
     """
 
     # Signal emitted when compilation succeeds
@@ -105,10 +121,17 @@ class DualEditor(QWidget):
 
         # Button bar
         self.button_bar = QHBoxLayout()
+        
         self.compile_button = QPushButton("🔨 Compile BASIC → Assembly")
         self.compile_button.clicked.connect(self.on_compile)
         self.compile_button.setToolTip("Compile BASIC code to Assembly (Ctrl+B)")
         self.button_bar.addWidget(self.compile_button)
+        
+        self.toggle_asm_button = QPushButton("📄 Show Assembly")
+        self.toggle_asm_button.clicked.connect(self.toggle_assembly_visibility)
+        self.toggle_asm_button.setToolTip("Toggle assembly code visibility")
+        self.button_bar.addWidget(self.toggle_asm_button)
+        
         self.button_bar.addStretch()
 
         self.layout.addLayout(self.button_bar)
@@ -144,6 +167,11 @@ class DualEditor(QWidget):
         self.splitter.addWidget(self.basic_editor)
         self.splitter.addWidget(self.assembly_editor)
         self.splitter.setSizes([500, 500])  # Equal split
+        
+        # Prevent editors from collapsing and set minimum sizes
+        self.splitter.setChildrenCollapsible(False)
+        self.basic_editor.setMinimumWidth(200)
+        self.assembly_editor.setMinimumWidth(200)
 
         self.layout.addWidget(self.splitter)
 
@@ -152,15 +180,59 @@ class DualEditor(QWidget):
         self.basic_to_asm_map = {}  # Maps BASIC line number → list of assembly line numbers
         self.asm_to_basic_map = {}  # Maps assembly line number → BASIC line number
 
-        # Execution mode
-        self.mode = "basic"  # "basic" or "assembly"
+        # Execution mode: "basic" or "assembly"
+        self.mode = "basic"
+        
+        # Assembly visibility state (for BASIC mode)
+        self.assembly_visible = False
+        
+        # Initialize visibility for BASIC mode
+        self._apply_mode()
+
+    def _apply_mode(self):
+        """Apply visibility settings based on current mode"""
+        if self.mode == "assembly":
+            # Assembly mode: only show assembly editor (editable)
+            self.basic_editor.hide()
+            self.assembly_editor.show()
+            self.assembly_editor.set_read_only(False)
+            self.assembly_editor.set_title("Assembly Code")
+            
+            # Hide BASIC-specific buttons
+            self.compile_button.hide()
+            self.toggle_asm_button.hide()
+        else:
+            # BASIC mode: show BASIC editor, assembly based on toggle
+            self.basic_editor.show()
+            self.assembly_editor.set_read_only(True)
+            self.assembly_editor.set_title("Generated Assembly (Read-Only)")
+            
+            # Show BASIC-specific buttons
+            self.compile_button.show()
+            self.toggle_asm_button.show()
+            
+            # Apply assembly visibility toggle
+            if self.assembly_visible:
+                self.assembly_editor.show()
+                self.toggle_asm_button.setText("📄 Hide Assembly")
+            else:
+                self.assembly_editor.hide()
+                self.toggle_asm_button.setText("📄 Show Assembly")
+
+    def toggle_assembly_visibility(self):
+        """Toggle assembly editor visibility (BASIC mode only)"""
+        if self.mode == "basic":
+            self.assembly_visible = not self.assembly_visible
+            self._apply_mode()
 
     def get_basic_code(self):
         """Get BASIC code"""
         return self.basic_editor.get_code()
 
     def get_assembly_code(self):
-        """Get generated assembly code"""
+        """Get assembly code (compiled or hand-written depending on mode)"""
+        if self.mode == "assembly":
+            return self.assembly_editor.get_code()
         return self.compiled_assembly
 
     def on_compile(self):
@@ -186,6 +258,10 @@ class DualEditor(QWidget):
             # Store line mappings
             self.basic_to_asm_map = result.line_map
             self.build_reverse_map()
+
+            # Auto-show assembly after successful compilation
+            self.assembly_visible = True
+            self._apply_mode()
 
             # Emit success signal
             self.compilation_successful.emit(result.assembly, result.line_map)
@@ -260,3 +336,4 @@ class DualEditor(QWidget):
     def set_mode(self, mode):
         """Set execution mode: 'basic' or 'assembly'"""
         self.mode = mode
+        self._apply_mode()

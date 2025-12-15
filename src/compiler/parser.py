@@ -95,6 +95,8 @@ class Parser:
             return self.parse_rem()
         elif token.type == TokenType.END:
             return self.parse_end()
+        elif token.type == TokenType.POKE:
+            return self.parse_poke()
         else:
             raise SyntaxError(
                 f"Unexpected token {token.type.name} at line {token.line}:{token.column}"
@@ -177,6 +179,14 @@ class Parser:
         """Parse END statement"""
         self.expect(TokenType.END)
         return EndStatement(self.current_line_number)
+
+    def parse_poke(self) -> PokeStatement:
+        """Parse POKE statement: POKE address, value"""
+        self.expect(TokenType.POKE)
+        address = self.parse_expression()
+        self.expect(TokenType.COMMA)
+        value = self.parse_expression()
+        return PokeStatement(self.current_line_number, address, value)
 
     def parse_comparison(self) -> Comparison:
         """Parse comparison: expression op expression"""
@@ -272,9 +282,17 @@ class Parser:
             self.expect(TokenType.RPAREN)
             return expr
 
+        # PEEK function: PEEK(address)
+        elif token.type == TokenType.PEEK:
+            self.advance()
+            self.expect(TokenType.LPAREN)
+            address = self.parse_expression()
+            self.expect(TokenType.RPAREN)
+            return PeekExpression(self.current_line_number, address)
+
         else:
             raise SyntaxError(
-                f"Expected number, variable, or '(', got {token.type.name} "
+                f"Expected number, variable, PEEK, or '(', got {token.type.name} "
                 f"at line {token.line}:{token.column}"
             )
 

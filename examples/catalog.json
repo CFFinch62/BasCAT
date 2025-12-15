@@ -7,7 +7,10 @@
       "difficulty": "Beginner",
       "file": "basic/01_hello_world.bas",
       "description": "Your first program! Outputs the number 72 (ASCII code for 'H').",
-      "concepts": ["PRINT", "END"]
+      "concepts": [
+        "PRINT",
+        "END"
+      ]
     },
     {
       "id": "addition",
@@ -16,7 +19,11 @@
       "difficulty": "Beginner",
       "file": "basic/02_addition.bas",
       "description": "Learn variables and arithmetic by adding two numbers.",
-      "concepts": ["LET", "Variables", "Arithmetic"]
+      "concepts": [
+        "LET",
+        "Variables",
+        "Arithmetic"
+      ]
     },
     {
       "id": "input_echo",
@@ -25,7 +32,12 @@
       "difficulty": "Beginner",
       "file": "basic/03_input_echo.bas",
       "description": "Read user input and echo it back. Demonstrates I/O operations.",
-      "concepts": ["INPUT", "PRINT", "GOTO", "Infinite loop"]
+      "concepts": [
+        "INPUT",
+        "PRINT",
+        "GOTO",
+        "Infinite loop"
+      ]
     },
     {
       "id": "counter",
@@ -34,7 +46,11 @@
       "difficulty": "Beginner",
       "file": "basic/04_counter.bas",
       "description": "Count from 0 to 5 using a FOR loop.",
-      "concepts": ["FOR", "NEXT", "Loop variable"]
+      "concepts": [
+        "FOR",
+        "NEXT",
+        "Loop variable"
+      ]
     },
     {
       "id": "conditional",
@@ -43,7 +59,12 @@
       "difficulty": "Beginner",
       "file": "basic/05_conditional.bas",
       "description": "Check if input is greater than 50 and print 1 or 0.",
-      "concepts": ["IF", "THEN", "GOTO", "Comparison"]
+      "concepts": [
+        "IF",
+        "THEN",
+        "GOTO",
+        "Comparison"
+      ]
     },
     {
       "id": "accumulator",
@@ -52,7 +73,12 @@
       "difficulty": "Intermediate",
       "file": "basic/06_accumulator.bas",
       "description": "Add numbers until total exceeds 100. Demonstrates accumulation pattern.",
-      "concepts": ["Variables", "INPUT", "Addition", "Conditional loop"]
+      "concepts": [
+        "Variables",
+        "INPUT",
+        "Addition",
+        "Conditional loop"
+      ]
     },
     {
       "id": "countdown",
@@ -61,7 +87,11 @@
       "difficulty": "Intermediate",
       "file": "basic/07_countdown.bas",
       "description": "Count down from 10 to 0. Shows manual loop control.",
-      "concepts": ["Variables", "Subtraction", "Conditional GOTO"]
+      "concepts": [
+        "Variables",
+        "Subtraction",
+        "Conditional GOTO"
+      ]
     },
     {
       "id": "max_finder",
@@ -70,7 +100,11 @@
       "difficulty": "Intermediate",
       "file": "basic/08_max_finder.bas",
       "description": "Find the maximum of two numbers using conditionals.",
-      "concepts": ["INPUT", "Comparison", "Branching"]
+      "concepts": [
+        "INPUT",
+        "Comparison",
+        "Branching"
+      ]
     },
     {
       "id": "asm_echo",
@@ -79,7 +113,12 @@
       "difficulty": "Beginner",
       "file": "assembly/01_echo.asm",
       "description": "Assembly: Read input and echo it back. Demonstrates IN and OUT instructions.",
-      "concepts": ["IN", "OUT", "JMP", "Labels"]
+      "concepts": [
+        "IN",
+        "OUT",
+        "JMP",
+        "Labels"
+      ]
     },
     {
       "id": "asm_add",
@@ -88,7 +127,12 @@
       "difficulty": "Beginner",
       "file": "assembly/02_add_numbers.asm",
       "description": "Assembly: Add two numbers using memory and registers.",
-      "concepts": ["LOAD", "ADD", "STM", "LDM"]
+      "concepts": [
+        "LOAD",
+        "ADD",
+        "STM",
+        "LDM"
+      ]
     },
     {
       "id": "asm_hello",
@@ -97,7 +141,11 @@
       "difficulty": "Beginner",
       "file": "assembly/03_hello_world.asm",
       "description": "Assembly: Output 'HI' using ASCII codes. Your first assembly program!",
-      "concepts": ["LOAD", "OUT", "HALT"]
+      "concepts": [
+        "LOAD",
+        "OUT",
+        "HALT"
+      ]
     },
     {
       "id": "asm_logic",
@@ -106,7 +154,13 @@
       "difficulty": "Intermediate",
       "file": "assembly/04_logic_operations.asm",
       "description": "Assembly: Demonstrates AND, OR, XOR, NOT bitwise operations.",
-      "concepts": ["AND", "OR", "XOR", "NOT", "Bitwise operations"]
+      "concepts": [
+        "AND",
+        "OR",
+        "XOR",
+        "NOT",
+        "Bitwise operations"
+      ]
     },
     {
       "id": "asm_conditional",
@@ -115,7 +169,12 @@
       "difficulty": "Intermediate",
       "file": "assembly/05_conditional_loop.asm",
       "description": "Assembly: Count to 10 using CMP and JNZ for conditional looping.",
-      "concepts": ["CMP", "JNZ", "Loops", "Labels"]
+      "concepts": [
+        "CMP",
+        "JNZ",
+        "Loops",
+        "Labels"
+      ]
     },
     {
       "id": "asm_stack",
@@ -124,7 +183,12 @@
       "difficulty": "Advanced",
       "file": "assembly/06_stack_demo.asm",
       "description": "Assembly: Demonstrates PUSH and POP stack operations. Shows how to save and restore register values.",
-      "concepts": ["PUSH", "POP", "Stack", "Stack Pointer"]
+      "concepts": [
+        "PUSH",
+        "POP",
+        "Stack",
+        "Stack Pointer"
+      ]
     },
     {
       "id": "asm_memory",
@@ -133,7 +197,11 @@
       "difficulty": "Intermediate",
       "file": "assembly/07_memory_operations.asm",
       "description": "Assembly: Shows LDM and STM for loading and storing values in memory.",
-      "concepts": ["LDM", "STM", "Memory addressing"]
+      "concepts": [
+        "LDM",
+        "STM",
+        "Memory addressing"
+      ]
     },
     {
       "id": "asm_mov",
@@ -142,7 +210,11 @@
       "difficulty": "Intermediate",
       "file": "assembly/08_mov_register.asm",
       "description": "Assembly: Demonstrates MOV instruction for copying data between registers.",
-      "concepts": ["MOV", "Registers", "Data movement"]
+      "concepts": [
+        "MOV",
+        "Registers",
+        "Data movement"
+      ]
     },
     {
       "id": "asm_complex",
@@ -151,7 +223,39 @@
       "difficulty": "Advanced",
       "file": "assembly/09_complex_program.asm",
       "description": "Assembly: Combines multiple concepts - input, arithmetic, logic, loops, and output.",
-      "concepts": ["All instructions", "Complex logic", "Full program"]
+      "concepts": [
+        "All instructions",
+        "Complex logic",
+        "Full program"
+      ]
+    },
+    {
+      "id": "memory_demo",
+      "title": "Memory Demo (POKE/PEEK)",
+      "category": "Memory",
+      "difficulty": "Intermediate",
+      "file": "basic/09_memory_demo.bas",
+      "description": "Store and retrieve values using POKE and PEEK for direct memory access.",
+      "concepts": [
+        "POKE",
+        "PEEK",
+        "Memory addressing",
+        "Data storage"
+      ]
+    },
+    {
+      "id": "asm_data_storage",
+      "title": "[ASM] Data Storage",
+      "category": "Assembly",
+      "difficulty": "Intermediate",
+      "file": "assembly/09_data_storage.asm",
+      "description": "Assembly: Store and retrieve data in the free RAM area using LDM/STM.",
+      "concepts": [
+        "LDM",
+        "STM",
+        "Data area",
+        "Free RAM"
+      ]
     }
   ],
   "categories": [
@@ -174,6 +278,10 @@
     {
       "name": "Math",
       "description": "Mathematical operations and algorithms"
+    },
+    {
+      "name": "Memory",
+      "description": "Direct memory access with POKE and PEEK"
     },
     {
       "name": "Assembly",

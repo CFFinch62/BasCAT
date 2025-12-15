@@ -74,17 +74,43 @@ class CPU:
                 signals.register_updated.emit(reg_name, value)
                 signals.bus_transfer.emit("Memory", reg_name, value, "data")
 
-        elif opcode == 0x02:  # ADD Reg, Value (simplified: add immediate to A)
-            value = self.fetch_byte()
-            result = self.alu.add(self.registers["A"], value)
-            self.registers["A"] = result & 0xFF
-            signals.register_updated.emit("A", self.registers["A"])
+        elif opcode == 0x02:  # ADD Reg, Value/Reg
+            reg_idx = self.fetch_byte()
+            operand_byte = self.fetch_byte()
+            reg_name = self._reg_name(reg_idx)
+            if reg_name:
+                # Check if operand is register (high bit set) or immediate
+                if operand_byte & 0x80:
+                    src_idx = operand_byte & 0x7F
+                    src_name = self._reg_name(src_idx)
+                    if src_name:
+                        value = self.registers[src_name]
+                    else:
+                        value = 0
+                else:
+                    value = operand_byte
+                result = self.alu.add(self.registers[reg_name], value)
+                self.registers[reg_name] = result & 0xFF
+                signals.register_updated.emit(reg_name, self.registers[reg_name])
 
-        elif opcode == 0x03:  # SUB (placeholder)
-            value = self.fetch_byte()
-            result = self.alu.subtract(self.registers["A"], value)
-            self.registers["A"] = result & 0xFF
-            signals.register_updated.emit("A", self.registers["A"])
+        elif opcode == 0x03:  # SUB Reg, Value/Reg
+            reg_idx = self.fetch_byte()
+            operand_byte = self.fetch_byte()
+            reg_name = self._reg_name(reg_idx)
+            if reg_name:
+                # Check if operand is register (high bit set) or immediate
+                if operand_byte & 0x80:
+                    src_idx = operand_byte & 0x7F
+                    src_name = self._reg_name(src_idx)
+                    if src_name:
+                        value = self.registers[src_name]
+                    else:
+                        value = 0
+                else:
+                    value = operand_byte
+                result = self.alu.subtract(self.registers[reg_name], value)
+                self.registers[reg_name] = result & 0xFF
+                signals.register_updated.emit(reg_name, self.registers[reg_name])
 
         elif opcode == 0x04:  # MOV Dest, Source
             dest_idx = self.fetch_byte()
@@ -106,23 +132,50 @@ class CPU:
                 signals.register_updated.emit(dest_name, self.registers[dest_name])
 
         # Logic operations
-        elif opcode == 0x05:  # AND Reg, Value
-            value = self.fetch_byte()
-            result = self.alu.operate("AND", self.registers["A"], value)
-            self.registers["A"] = result & 0xFF
-            signals.register_updated.emit("A", self.registers["A"])
+        elif opcode == 0x05:  # AND Reg, Value/Reg
+            reg_idx = self.fetch_byte()
+            operand_byte = self.fetch_byte()
+            reg_name = self._reg_name(reg_idx)
+            if reg_name:
+                if operand_byte & 0x80:
+                    src_idx = operand_byte & 0x7F
+                    src_name = self._reg_name(src_idx)
+                    value = self.registers[src_name] if src_name else 0
+                else:
+                    value = operand_byte
+                result = self.alu.operate("AND", self.registers[reg_name], value)
+                self.registers[reg_name] = result & 0xFF
+                signals.register_updated.emit(reg_name, self.registers[reg_name])
 
-        elif opcode == 0x06:  # OR Reg, Value
-            value = self.fetch_byte()
-            result = self.alu.operate("OR", self.registers["A"], value)
-            self.registers["A"] = result & 0xFF
-            signals.register_updated.emit("A", self.registers["A"])
+        elif opcode == 0x06:  # OR Reg, Value/Reg
+            reg_idx = self.fetch_byte()
+            operand_byte = self.fetch_byte()
+            reg_name = self._reg_name(reg_idx)
+            if reg_name:
+                if operand_byte & 0x80:
+                    src_idx = operand_byte & 0x7F
+                    src_name = self._reg_name(src_idx)
+                    value = self.registers[src_name] if src_name else 0
+                else:
+                    value = operand_byte
+                result = self.alu.operate("OR", self.registers[reg_name], value)
+                self.registers[reg_name] = result & 0xFF
+                signals.register_updated.emit(reg_name, self.registers[reg_name])
 
-        elif opcode == 0x07:  # XOR Reg, Value
-            value = self.fetch_byte()
-            result = self.alu.operate("XOR", self.registers["A"], value)
-            self.registers["A"] = result & 0xFF
-            signals.register_updated.emit("A", self.registers["A"])
+        elif opcode == 0x07:  # XOR Reg, Value/Reg
+            reg_idx = self.fetch_byte()
+            operand_byte = self.fetch_byte()
+            reg_name = self._reg_name(reg_idx)
+            if reg_name:
+                if operand_byte & 0x80:
+                    src_idx = operand_byte & 0x7F
+                    src_name = self._reg_name(src_idx)
+                    value = self.registers[src_name] if src_name else 0
+                else:
+                    value = operand_byte
+                result = self.alu.operate("XOR", self.registers[reg_name], value)
+                self.registers[reg_name] = result & 0xFF
+                signals.register_updated.emit(reg_name, self.registers[reg_name])
 
         elif opcode == 0x08:  # NOT Reg
             reg_idx = self.fetch_byte()
@@ -227,6 +280,15 @@ class CPU:
             reg_idx = self.fetch_byte()
             reg_name = self._reg_name(reg_idx)
             if reg_name:
+                # Check if input is available
+                if not self.memory.io_controller.has_input():
+                    # No input available - rewind PC to re-execute this instruction
+                    # This effectively "blocks" until input is provided
+                    self.PC -= 2  # Rewind past opcode + register byte
+                    signals.pc_updated.emit(self.PC)
+                    signals.input_requested.emit()
+                    return  # Don't proceed - wait for input
+                
                 # Read from INPUT port address
                 value = self.memory.read(0xFF)
                 self.registers[reg_name] = value

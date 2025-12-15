@@ -62,9 +62,10 @@ def test_logic_xor():
     mem = Memory()
     cpu = CPU(mem)
 
+    # Use values that fit in 7-bit immediate mode (0-127)
     code = """
-    LOAD A, 0xFF
-    XOR A, 0xFF
+    LOAD A, 0x5A
+    XOR A, 0x5A
     HALT
     """
     bytecode, error, _ = Assembler.assemble(code)
@@ -77,7 +78,7 @@ def test_logic_xor():
     cpu.execute_instruction()  # LOAD
     cpu.execute_instruction()  # XOR
 
-    assert cpu.registers["A"] == 0x00  # 0xFF ^ 0xFF = 0x00
+    assert cpu.registers["A"] == 0x00  # 0x5A ^ 0x5A = 0x00
     assert cpu.alu.flags["Z"] == 1
 
 def test_logic_not():

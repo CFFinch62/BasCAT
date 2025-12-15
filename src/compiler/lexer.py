@@ -27,6 +27,8 @@ class TokenType(Enum):
     NEXT = auto()
     REM = auto()
     END = auto()
+    POKE = auto()
+    PEEK = auto()
 
     # Operators
     PLUS = auto()
@@ -49,6 +51,7 @@ class TokenType(Enum):
     # Structure
     LPAREN = auto()
     RPAREN = auto()
+    COMMA = auto()
     NEWLINE = auto()
     EOF = auto()
 
@@ -83,6 +86,8 @@ class Lexer:
         'NEXT': TokenType.NEXT,
         'REM': TokenType.REM,
         'END': TokenType.END,
+        'POKE': TokenType.POKE,
+        'PEEK': TokenType.PEEK,
         'AND': TokenType.AND,
         'OR': TokenType.OR,
         'XOR': TokenType.XOR,
@@ -223,6 +228,10 @@ class Lexer:
 
             elif ch == ')':
                 self.tokens.append(Token(TokenType.RPAREN, ')', self.line, start_col))
+                self.advance()
+
+            elif ch == ',':
+                self.tokens.append(Token(TokenType.COMMA, ',', self.line, start_col))
                 self.advance()
 
             elif ch == '=':

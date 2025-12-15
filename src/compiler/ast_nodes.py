@@ -121,6 +121,19 @@ class EndStatement(ASTNode):
     pass
 
 
+@dataclass
+class PokeStatement(ASTNode):
+    """POKE address, value - Write value to memory address"""
+    address: ASTNode   # Expression for address
+    value: ASTNode     # Expression for value
+
+
+@dataclass
+class PeekExpression(ASTNode):
+    """PEEK(address) - Read value from memory address"""
+    address: ASTNode   # Expression for address
+
+
 # Helper function to print AST
 def print_ast(node: ASTNode, indent=0):
     """Pretty-print AST for debugging"""

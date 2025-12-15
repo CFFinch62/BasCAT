@@ -13,10 +13,14 @@ class CircuitView(QGraphicsView):
         self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
         self.setBackgroundBrush(QBrush(QColor("#1e1e1e")))
+        
+        # Allow this view to shrink so bottom dock can expand
+        self.setMinimumHeight(200)
 
         # Grid lines (optional visual aid)
         self.draw_grid()
         self.setup_scene()
+
 
     def draw_grid(self):
         pen = QPen(QColor("#2a2a2a"))
@@ -163,6 +167,14 @@ class CircuitView(QGraphicsView):
         self.bus_io_data = BusVisual([(io_x, io_center_y), (LEFT_BUS_X, io_center_y)])
         self.scene.addItem(self.bus_io_data)
 
+        # ===== STACK VISUAL (next to I/O) =====
+        from src.gui.components.graphics import StackVisual
+        STACK_WIDTH = 85
+        stack_x = io_x + IO_WIDTH + 20  # Right of I/O
+        self.stack_visual = StackVisual(stack_x, 390)
+        self.stack_visual.clicked = self.on_stack_clicked
+        self.scene.addItem(self.stack_visual)
+
         # Connect signals
         from src.core.signals import signals
         signals.bus_transfer.connect(self.on_bus_transfer)
@@ -224,7 +236,18 @@ class CircuitView(QGraphicsView):
     def on_sp_updated(self, value):
         """Update SP visual when stack pointer changes"""
         self.sp.set_value(value)
+        # Also update stack visual
+        self.stack_visual.set_sp(value)
 
     def on_flags_updated(self, flags_dict):
         """Update CPU flags display when ALU flags change"""
         self.cpu_rect.update_flags(flags_dict)
+
+    def on_stack_clicked(self):
+        """Handle stack visual click - emit signal to toggle memory panel"""
+        from src.core.signals import signals
+        signals.memory_panel_toggle.emit()
+
+    def set_memory(self, memory):
+        """Set memory reference for stack visual"""
+        self.stack_visual.set_memory(memory)

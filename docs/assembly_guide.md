@@ -52,8 +52,8 @@ Load from memory address into register.
 
 **Example**:
 ```assembly
-LDM A, 10     ; Load value from memory address 10 into A
-LDM B, 254    ; Load from I/O port (address 254)
+LDM A, 0x80   ; Load value from memory address 0x80 into A (variable A)
+LDM B, 0xFE   ; Load from I/O port (address 0xFE)
 ```
 
 **Flags**: None affected
@@ -70,8 +70,8 @@ Store register value to memory address.
 **Example**:
 ```assembly
 LOAD A, 42
-STM 100, A    ; Store value 42 to memory address 100
-STM 254, A    ; Write to output port
+STM 0x64, A   ; Store value 42 to memory address 0x64 (100 decimal)
+STM 0xFE, A   ; Write to output port
 ```
 
 **Flags**: None affected
@@ -80,20 +80,28 @@ STM 254, A    ; Write to output port
 
 ## Arithmetic Instructions
 
-### ADD reg, value
+### ADD reg, value/reg
 **Opcode**: 0x02
 
-Adds a value to a register.
+Adds a value or register to a register.
 
-**Format**: `ADD A, 5`
+**Formats**:
+- `ADD A, 5` - Add immediate value to register
+- `ADD A, B` - Add register B to register A
 
 **Example**:
 ```assembly
 LOAD A, 10
-ADD A, 5      ; A = 15
+ADD A, 5      ; A = 15 (immediate mode)
+
+LOAD A, 5
+LOAD B, 3
+ADD A, B      ; A = 8 (register mode)
 ```
 
 **Flags**: Z (if result is 0), C (if overflow), O (if overflow), N (if negative)
+
+**Note**: Immediate values are limited to 0-127 when using the standard instruction encoding.
 
 ---
 
@@ -480,11 +488,8 @@ loop:
 ```assembly
 LOAD A, 5
 LOAD B, 3
-ADD A, B      ; Note: ADD only takes immediate, so use memory
-STM 10, A
-STM 11, B
-LDM A, 10
-; For proper addition, load to temp memory
+ADD A, B      ; Add B to A (register mode)
+STM 0x80, A   ; Store result to variable A location
 HALT
 ```
 

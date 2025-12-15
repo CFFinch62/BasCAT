@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (QMainWindow, QDockWidget, QLabel, QWidget, QVBoxLayout,
                               QFileDialog, QMessageBox, QTextBrowser, QDialog,
-                              QDialogButtonBox)
+                              QDialogButtonBox, QSplitter)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction
 import json
@@ -12,6 +12,7 @@ from src.gui.dual_editor import DualEditor
 from src.gui.controls import ControlPanel
 from src.gui.io_panel import IOPanel
 from src.gui.metrics_panel import MetricsPanel
+from src.gui.memory_panel import MemoryPanel
 from src.core.sim_manager import SimManager
 
 class MainWindow(QMainWindow):
@@ -19,13 +20,33 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("BasCAT: BASIC Computer Architecture Trainer")
         self.resize(1400, 900)
+        
+        # Set application icon
+        from PyQt6.QtGui import QIcon
+        import os
+        icon_path = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "bascat_icon_512_v2.png")
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
 
         # Simulation Backbone
         self.sim = SimManager()
 
-        # Central Widget (Circuit Board)
+        # Central Widget: Splitter with CPU Circuit and Memory Panel
+        self.central_splitter = QSplitter(Qt.Orientation.Horizontal)
+        
+        # Left: Circuit View (CPU visualization)
         self.central_widget = CircuitView()
-        self.setCentralWidget(self.central_widget)
+        self.central_splitter.addWidget(self.central_widget)
+        
+        # Right: Memory Panel (stack/memory viewer)
+        self.memory_panel = MemoryPanel()
+        self.central_splitter.addWidget(self.memory_panel)
+        
+        # Set initial sizes (circuit wider, memory narrower)
+        self.central_splitter.setSizes([550, 250])
+        self._memory_panel_last_size = 250  # Track last size for toggle
+        
+        self.setCentralWidget(self.central_splitter)
 
         # Setup Docks
         self.setup_docks()
@@ -41,6 +62,7 @@ class MainWindow(QMainWindow):
 
         # Current file path
         self.current_file = None
+
 
     def connect_signals(self):
         # Run Button Logic: Assemble -> Load -> Run
@@ -64,24 +86,34 @@ class MainWindow(QMainWindow):
 
         # Connect I/O signals
         self.io_panel.input_submitted.connect(self.on_input_submitted)
+        self.io_panel.numeric_input_submitted.connect(self.on_numeric_input_submitted)
         signals.output_written.connect(self.io_panel.display_byte)
         signals.output_char_written.connect(self.io_panel.display_char)
         signals.output_char_written.connect(lambda: self.metrics_panel.increment_output())
         signals.output_cleared.connect(self.io_panel.clear_output)
 
     def on_run(self):
-        """Run the program (uses compiled assembly)"""
-        # Get assembly code (either compiled or from dual editor)
+        """Run the program (uses compiled or hand-written assembly)"""
         code = self.dual_editor.get_assembly_code()
 
         if not code.strip():
-            # No compiled code, try to compile first
-            self.dual_editor.on_compile()
-            code = self.dual_editor.get_assembly_code()
+            # No assembly code available
+            if self.execution_mode == "basic":
+                # Try to compile BASIC first
+                self.dual_editor.on_compile()
+                code = self.dual_editor.get_assembly_code()
+            else:
+                # In assembly mode, user needs to write code
+                from PyQt6.QtWidgets import QMessageBox
+                QMessageBox.warning(self, "No Code", "Please enter assembly code to run.")
+                return
 
         if code.strip() and self.sim.load_code(code):
-            # Pass line mapping to sim manager
+            # Pass line mapping to sim manager (empty in assembly mode)
             self.sim.set_basic_line_map(self.dual_editor.basic_to_asm_map)
+            # Refresh memory panel to show loaded program
+            self.memory_panel.refresh_display()
+            self.central_widget.stack_visual.set_sp(0xFD)
             self.sim.run()
 
     def on_step(self):
@@ -90,15 +122,25 @@ class MainWindow(QMainWindow):
         if not self.sim.line_map:
             code = self.dual_editor.get_assembly_code()
             if not code.strip():
-                # Try to compile
-                self.dual_editor.on_compile()
-                code = self.dual_editor.get_assembly_code()
+                if self.execution_mode == "basic":
+                    # Try to compile
+                    self.dual_editor.on_compile()
+                    code = self.dual_editor.get_assembly_code()
+                else:
+                    from PyQt6.QtWidgets import QMessageBox
+                    QMessageBox.warning(self, "No Code", "Please enter assembly code to run.")
+                    return
 
             if not self.sim.load_code(code):
                 return  # Assembly error
             self.sim.set_basic_line_map(self.dual_editor.basic_to_asm_map)
+            # Refresh memory panel to show loaded program
+            self.memory_panel.refresh_display()
+            self.central_widget.stack_visual.set_sp(0xFD)
 
         self.sim.step()
+        # Refresh memory panel after step execution
+        self.memory_panel.refresh_display()
 
     def on_step_over(self):
         """Step over: Execute entire BASIC statement (multiple assembly instructions)"""
@@ -106,21 +148,35 @@ class MainWindow(QMainWindow):
         if not self.sim.line_map:
             code = self.dual_editor.get_assembly_code()
             if not code.strip():
-                # Try to compile
-                self.dual_editor.on_compile()
-                code = self.dual_editor.get_assembly_code()
+                if self.execution_mode == "basic":
+                    # Try to compile
+                    self.dual_editor.on_compile()
+                    code = self.dual_editor.get_assembly_code()
+                else:
+                    from PyQt6.QtWidgets import QMessageBox
+                    QMessageBox.warning(self, "No Code", "Please enter assembly code to run.")
+                    return
 
             if not self.sim.load_code(code):
                 return  # Assembly error
             self.sim.set_basic_line_map(self.dual_editor.basic_to_asm_map)
+            # Refresh memory panel to show loaded program
+            self.memory_panel.refresh_display()
+            self.central_widget.stack_visual.set_sp(0xFD)
 
         self.sim.step_over()
+        # Refresh memory panel after step execution
+        self.memory_panel.refresh_display()
 
     def on_reset(self):
         """Reset the simulation"""
         self.dual_editor.clear_highlights()
         self.sim.reset()
         self.metrics_panel.reset_metrics()
+        # Refresh memory panel to show cleared memory
+        self.memory_panel.refresh_display()
+        # Update stack visual with reset SP
+        self.central_widget.stack_visual.set_sp(0xFD)
 
     def on_instruction_executed(self):
         """Update metrics when an instruction is executed"""
@@ -146,7 +202,6 @@ class MainWindow(QMainWindow):
 
     def on_compilation_success(self, assembly_code, line_map):
         """Handle successful BASIC compilation"""
-        print(f"Compilation successful: {len(assembly_code)} chars, {len(line_map)} mapped lines")
         # Get bytecode size
         from src.core.assembler import Assembler
         bytecode, error, _ = Assembler.assemble(assembly_code)
@@ -155,12 +210,17 @@ class MainWindow(QMainWindow):
 
     def on_compilation_failed(self, error_message):
         """Handle failed BASIC compilation"""
-        print(f"Compilation failed: {error_message}")
+        pass
 
     def on_input_submitted(self, text):
-        """Handle input submitted from I/O panel"""
+        """Handle input submitted from I/O panel (ASCII mode)"""
         # Queue the input string to the I/O controller
         self.sim.memory.io_controller.queue_string(text)
+
+    def on_numeric_input_submitted(self, value):
+        """Handle numeric input submitted from I/O panel (Numeric mode)"""
+        # Queue the single byte value directly
+        self.sim.memory.io_controller.queue_input(value)
 
     def setup_docks(self):
         # Dual Editor Dock (Left) - BASIC + Assembly side-by-side
@@ -190,6 +250,29 @@ class MainWindow(QMainWindow):
         self.metrics_panel = MetricsPanel()
         self.metrics_dock.setWidget(self.metrics_panel)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.metrics_dock)
+
+        # Connect memory reference to circuit view and memory panel
+        # (memory_panel is created in __init__ as part of central splitter)
+        self.central_widget.set_memory(self.sim.memory)
+        self.memory_panel.set_memory(self.sim.memory)
+        
+        # Connect SP updates to memory panel and toggle signal
+        from src.core.signals import signals
+        signals.sp_updated.connect(self.memory_panel.set_sp)
+        signals.memory_panel_toggle.connect(self.toggle_memory_panel)
+
+    def toggle_memory_panel(self):
+        """Toggle memory panel visibility by collapsing/expanding the splitter"""
+        sizes = self.central_splitter.sizes()
+        if sizes[1] > 0:
+            # Memory panel is visible, collapse it
+            self._memory_panel_last_size = sizes[1]
+            self.central_splitter.setSizes([sizes[0] + sizes[1], 0])
+        else:
+            # Memory panel is collapsed, restore it
+            total = sizes[0] + sizes[1]
+            self.central_splitter.setSizes([total - self._memory_panel_last_size, self._memory_panel_last_size])
+
 
     def setup_menus(self):
         """Setup application menus"""
@@ -335,7 +418,6 @@ class MainWindow(QMainWindow):
                     submenu.addAction(action)
 
         except Exception as e:
-            print(f"Failed to load examples catalog: {e}")
             action = QAction("(No examples available)", self)
             action.setEnabled(False)
             menu.addAction(action)

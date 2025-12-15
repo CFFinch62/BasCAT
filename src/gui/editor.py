@@ -32,12 +32,10 @@ class CodeEditor(QWidget):
 
     def highlight_line(self, line_number):
         """Highlight the specified line number (0-based)"""
-        print(f"DEBUG: highlight_line called with line_number={line_number}")
         self.current_highlight_line = line_number
 
         # Create a selection for the line
         block = self.editor.document().findBlockByLineNumber(line_number)
-        print(f"DEBUG: block valid={block.isValid()}, text='{block.text()}'")
 
         cursor = QTextCursor(block)
         cursor.select(QTextCursor.SelectionType.LineUnderCursor)

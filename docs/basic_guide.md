@@ -239,6 +239,69 @@ Stop program execution.
 
 ---
 
+### POKE - Direct Memory Write
+
+Write a value directly to a memory address.
+
+**Syntax**: `POKE address, value`
+
+**Example**:
+```basic
+10 POKE 154, 42         ; Store 42 at memory address 154
+20 POKE 155, 100        ; Store 100 at memory address 155
+30 END
+```
+
+**Notes**:
+- Address must be 0-255 (use 154-237 for data storage)
+- Value must be 0-255
+- Generates `STM` assembly instruction
+- Useful for storing data arrays or lookup tables
+
+**Memory Map for POKE**:
+- **Safe data area**: 154-237 (0x9A-0xED) - 83 bytes free for your data
+- Avoid 0-127 (program code), 128-153 (variables A-Z), 254-255 (I/O)
+
+---
+
+### PEEK - Direct Memory Read
+
+Read a value directly from a memory address.
+
+**Syntax**: `PEEK(address)` (used in expressions)
+
+**Example**:
+```basic
+10 POKE 154, 42         ; Store 42 at address 154
+20 LET A = PEEK(154)    ; Read value from address 154 into A
+30 PRINT A              ; Outputs 42
+40 END
+```
+
+**Notes**:
+- PEEK is an expression, not a statement
+- Use with LET: `LET A = PEEK(address)`
+- Generates `LDM` assembly instruction
+- Returns 8-bit value (0-255)
+
+**Example - Simple Array**:
+```basic
+10 REM Store 3 values
+20 POKE 154, 10
+30 POKE 155, 20
+40 POKE 156, 30
+50 REM Read them back
+60 LET A = PEEK(154)
+70 LET B = PEEK(155)
+80 LET C = PEEK(156)
+90 PRINT A
+100 PRINT B
+110 PRINT C
+120 END
+```
+
+---
+
 ## Expressions
 
 ### Arithmetic Operators
@@ -420,10 +483,10 @@ When you compile SimpleBASCAT to assembly:
 L10:
   ; BASIC line 10
   LOAD A, 5
-  STM 10, A
+  STM 0x80, A
 L20:
   ; BASIC line 20
-  LDM A, 10
+  LDM A, 0x80
   OUT A
 L30:
   ; BASIC line 30
@@ -519,6 +582,24 @@ The following features are NOT supported in version 1.0:
 - **Multiplication**: Use repeated addition in a loop
 - **Division**: Use repeated subtraction
 - **Strings**: Use ASCII codes (72 = 'H')
+- **FOR with variable end**: Use a literal upper bound and exit early with IF
+
+**Example - FOR with variable end**:
+```basic
+10 REM Count from 0 to N (where N is in variable C)
+20 INPUT C              ; Get the desired end value
+30 FOR I = 0 TO 100     ; Use safe upper bound
+40   IF I >= C THEN GOTO 70
+50   PRINT I
+60 NEXT I
+70 END
+```
+
+This approach:
+- Uses a literal value (100) as the FOR end
+- Checks each iteration if we've reached the desired limit
+- Exits the loop early using GOTO
+- Works for any value of N up to 100
 
 ---
 
@@ -546,6 +627,33 @@ General syntax error. Check:
 - Line numbers present
 - Keywords spelled correctly
 - Expressions valid
+
+### "Variable names must be single letters A-Z"
+
+You tried to use a multi-letter variable name.
+
+**Error Example**:
+```basic
+10 LET COUNT = 5        ; Error: COUNT is not a valid variable
+20 LET Total = 10       ; Error: Total is not a valid variable
+30 LET X1 = 15          ; Error: X1 is not a valid variable
+```
+
+**Fix**: Use single letters and document their meaning:
+```basic
+10 REM C = count, T = total, X = result
+20 LET C = 5            ; Correct
+30 LET T = 10           ; Correct
+40 LET X = 15           ; Correct
+```
+
+**Why Single Letters?**
+- Simplifies the compiler
+- Mirrors early computer limitations
+- Teaches resource constraints
+- Encourages planning and documentation
+
+**Best Practice**: Always use REM comments to document what each variable represents.
 
 ---
 
@@ -583,50 +691,177 @@ Watch how BASIC compiles to assembly:
 
 **Compiles to**:
 ```assembly
-LDM A, 10     ; Load variable A from memory
+LDM A, 0x80   ; Load variable A from memory
 ADD A, 1      ; Add 1
-STM 10, A     ; Store back to memory
+STM 0x80, A   ; Store back to memory
 ```
 
 ### Memory Layout
 
 Understanding where variables live:
 
-| Variable | Address | Usage |
-|----------|---------|-------|
-| A | 10 | General purpose |
-| B | 11 | General purpose |
-| ... | ... | ... |
-| Z | 35 | General purpose |
+```
+┌──────────────┬────────────┬──────────────────┐
+│ Address      │ Purpose    │ BASIC Name       │
+├──────────────┼────────────┼──────────────────┤
+│ 0x00-0x7F    │ Program    │ Code Area (128B) │
+│ 0x80         │ Variable   │ A                │
+│ 0x81         │ Variable   │ B                │
+│ 0x82         │ Variable   │ C                │
+│ 0x83         │ Variable   │ D                │
+│ 0x84         │ Variable   │ E                │
+│ ...          │ ...        │ ...              │
+│ 0x97         │ Variable   │ X                │
+│ 0x98         │ Variable   │ Y                │
+│ 0x99         │ Variable   │ Z                │
+│ 0x9A-0xED    │ Available  │ Free RAM (~83B)  │
+│ 0xEE-0xFD    │ Stack      │ Stack (16B)      │
+│ 0xFE         │ I/O Port   │ Output           │
+│ 0xFF         │ I/O Port   │ Input            │
+└──────────────┴────────────┴──────────────────┘
+```
 
-**I/O Ports**:
-- 254 (0xFE): Output
-- 255 (0xFF): Input
+**Key Points**:
+- Program area: 0x00-0x7F (128 bytes max for compiled code)
+- Variables A-Z occupy addresses 0x80-0x99 (26 consecutive locations)
+- Formula: Variable address = 0x80 + (letter position in alphabet - 1)
+  - A = 0x80 + (1-1) = 0x80
+  - B = 0x80 + (2-1) = 0x81
+  - Z = 0x80 + (26-1) = 0x99
+- Stack: 0xEE-0xFD (16 bytes, grows downward from 0xFD)
+- I/O ports are at the top of memory (0xFE-0xFF)
 
-### Optimization
+**Why This Matters**:
+When you see assembly code like `STM 0x80, A`, you now know exactly where variable A lives in the computer's memory.
 
-SimpleBASCAT generates simple but potentially verbose code:
+### Optimization Philosophy
 
-**Less Efficient**:
+SimpleBASCAT intentionally generates **unoptimized** assembly code. This is not a bug - it's a deliberate design choice for educational purposes.
+
+**What SimpleBASCAT Does**:
 ```basic
-LET A = A + 1
+10 LET A = A + 1
 ```
 
-**Generates**:
+**Generated Assembly** (unoptimized):
 ```assembly
-LDM A, 10
-ADD A, 1
-STM 10, A     ; 3 instructions
+LDM A, 0x80   ; Load variable A from memory
+ADD A, 1      ; Add 1 to A (result stored in A - destructive operation)
+STM 0x80, A   ; Store back to memory
 ```
+**3 instructions** - Every step is visible and traceable.
 
-**More Efficient** (in pure assembly):
+**Important**: The `ADD A, B` instruction is a *destructive operation*. It adds the value in register B (or an immediate value) to register A and stores the result back in register A. The original value in A is lost. This is why we must reload A from memory each time.
+
+**What an Optimizing Compiler Might Do**:
 ```assembly
-LDM A, 10
-ADD A, 1
-STM 10, A     ; Same, but you could optimize manually
+INC [0x80]    ; Increment memory location 0x80 directly
+```
+**1 instruction** - Faster, but hides what's happening.
+
+**Why Unoptimized is Better for Learning**:
+- Each BASIC operation maps to clear, separate assembly instructions
+- The compilation process is transparent and predictable
+- Students can trace every step of execution
+- The "cost" of high-level operations becomes visible
+
+**The Trade-off**:
+- Real compilers optimize aggressively for speed and size
+- BasCAT optimizes for **understanding**
+
+When you're ready to learn about optimization, you can:
+1. Write SimpleBASCAT code
+2. Study the generated assembly
+3. Hand-optimize the assembly yourself
+4. Compare the results
+
+This teaches both *what computers do* and *how to make them do it efficiently*.
+
+---
+
+### Reading Assembly Code
+
+Understanding the assembly output is key to learning how computers work. Here's a detailed walkthrough:
+
+**SimpleBASCAT Program**:
+```basic
+10 REM Add two numbers
+20 LET A = 0
+30 INPUT B
+40 LET A = A + B
+50 PRINT A
+60 IF A < 100 THEN GOTO 30
+70 END
 ```
 
-For learning, the verbose code is actually good - it shows all steps clearly!
+**Generated Assembly** (with detailed explanation):
+
+```assembly
+L10:
+    ; BASIC line 10
+    ; REM: Add two numbers
+    ; (Comments generate no code)
+
+L20:
+    ; BASIC line 20: LET A = 0
+    LOAD A, 0            ; Load literal value 0 into register A
+    STM 0x80, A          ; Store register A into memory address 0x80 (variable A)
+    ; After: Memory[0x80] = 0, Register A = 0
+
+L30:
+    ; BASIC line 30: INPUT B
+    IN A                 ; Read input from I/O port into register A
+    STM 0x81, A          ; Store register A into memory address 0x81 (variable B)
+    ; After: Memory[0x81] = (user input), Register A = (user input)
+
+L40:
+    ; BASIC line 40: LET A = A + B
+    LDM A, 0x80          ; Load memory address 0x80 into register A (get A's value)
+    LDM B, 0x81          ; Load memory address 0x81 into register B (get B's value)
+    ADD A, B             ; Add B to A, result goes into A (A = A + B)
+    STM 0x80, A          ; Store register A back into memory address 0x80
+    ; After: Memory[0x80] = old_A + B, Register A = old_A + B, Register B = B
+
+L50:
+    ; BASIC line 50: PRINT A
+    LDM A, 0x80          ; Load memory address 0x80 into register A (get A's value)
+    OUT A                ; Output register A to I/O port
+    ; After: Display shows value of A
+
+L60:
+    ; BASIC line 60: IF A < 100 THEN GOTO 30
+    LDM A, 0x80          ; Load memory address 0x80 into register A (get A's value)
+    CMP A, 0x64          ; Compare A with 0x64 (100), set condition flags
+    JC L30               ; Jump to L30 if comparison is true (A < 100)
+    ; If A < 100: execution jumps to L30
+    ; If A >= 100: execution continues to next line
+
+L70:
+    ; BASIC line 70: END
+    HALT                 ; Stop program execution
+```
+
+**Key Observations**:
+
+1. **Every variable access requires memory operations**
+   - Variables live in memory (addresses 10, 11, etc.)
+   - Computation happens in registers (A, B)
+   - Pattern: Load → Compute → Store
+
+2. **Labels mark BASIC line numbers**
+   - L10, L20, L30 correspond to lines 10, 20, 30
+   - Used as jump targets (GOTO, IF...THEN)
+
+3. **One BASIC line can become multiple assembly instructions**
+   - Line 40 (`LET A = A + B`) becomes 4 instructions
+   - This reveals the "hidden cost" of simple operations
+
+4. **Registers are temporary**
+   - Register values are lost unless stored to memory
+   - This is why we reload A from memory at lines L50 and L60
+
+**Learning Exercise**: 
+Try modifying the BASIC program and predicting what assembly code will be generated before compiling. This builds intuition for how high-level code translates to machine operations.
 
 ---
 

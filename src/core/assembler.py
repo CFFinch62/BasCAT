@@ -81,8 +81,10 @@ class Assembler:
                 # Add operand bytes
                 if op in ("LOAD", "CMP", "LDM", "STM", "MOV"):
                     current_address += 2  # register + value/address
-                elif op in ("ADD", "SUB", "AND", "OR", "XOR", "JMP", "JZ", "JNZ", "JC", "JNC"):
-                    current_address += 1  # single operand
+                elif op in ("ADD", "SUB", "AND", "OR", "XOR"):
+                    current_address += 2  # register + value/register
+                elif op in ("JMP", "JZ", "JNZ", "JC", "JNC"):
+                    current_address += 1  # single operand (address)
                 elif op in ("NOT", "PUSH", "POP", "OUT", "IN"):
                     current_address += 1  # single register
                 # HALT and NOP have no operands
@@ -129,26 +131,50 @@ class Assembler:
                         return None, f"Invalid value {val}", {}
 
                 elif op == "ADD" or op == "SUB":
-                    # ADD/SUB Reg, Value (Immediate)
+                    # ADD/SUB Reg, Value or ADD/SUB Reg, Reg
                     if len(parts) < 3:
-                        return None, f"{op} requires Register and Value", {}
+                        return None, f"{op} requires Register and Value/Register", {}
                     reg = parts[1]
-                    val = parts[2]
-                    try:
-                        machine_code.append(int(val, 0) & 0xFF)
-                    except ValueError:
-                        return None, f"Invalid value {val}", {}
+                    operand = parts[2]
+                    
+                    if reg in Assembler.REGISTERS:
+                        machine_code.append(Assembler.REGISTERS[reg])
+                    else:
+                        return None, f"Unknown register {reg}", {}
+                    
+                    # Check if operand is register or immediate
+                    if operand in Assembler.REGISTERS:
+                        # Register mode: set high bit
+                        machine_code.append(0x80 | Assembler.REGISTERS[operand])
+                    else:
+                        # Immediate mode
+                        try:
+                            machine_code.append(int(operand, 0) & 0x7F)
+                        except ValueError:
+                            return None, f"Invalid value {operand}", {}
 
                 elif op == "AND" or op == "OR" or op == "XOR":
-                    # Logic operations: AND/OR/XOR Reg, Value
+                    # Logic operations: AND/OR/XOR Reg, Value or Reg, Reg
                     if len(parts) < 3:
-                        return None, f"{op} requires Register and Value", {}
+                        return None, f"{op} requires Register and Value/Register", {}
                     reg = parts[1]
-                    val = parts[2]
-                    try:
-                        machine_code.append(int(val, 0) & 0xFF)
-                    except ValueError:
-                        return None, f"Invalid value {val}", {}
+                    operand = parts[2]
+                    
+                    if reg in Assembler.REGISTERS:
+                        machine_code.append(Assembler.REGISTERS[reg])
+                    else:
+                        return None, f"Unknown register {reg}", {}
+                    
+                    # Check if operand is register or immediate
+                    if operand in Assembler.REGISTERS:
+                        # Register mode: set high bit
+                        machine_code.append(0x80 | Assembler.REGISTERS[operand])
+                    else:
+                        # Immediate mode
+                        try:
+                            machine_code.append(int(operand, 0) & 0x7F)
+                        except ValueError:
+                            return None, f"Invalid value {operand}", {}
 
                 elif op == "NOT":
                     # NOT Reg

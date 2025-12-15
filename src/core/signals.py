@@ -35,6 +35,9 @@ class ArchitectureSignals(QObject):
     input_queued = pyqtSignal(int)  # value queued
     input_consumed = pyqtSignal()  # input was read
     input_requested = pyqtSignal()  # program tried to read but no input available
+    
+    # Memory panel signals
+    memory_panel_toggle = pyqtSignal()  # toggle memory panel visibility
 
     def __init__(self):
         super().__init__()

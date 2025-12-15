@@ -1,4 +1,5 @@
 # BasCAT - BASIC Computer Architecture Trainer
+![alt text](assets/bascat_banner_v2.png)
 
 An educational 8-bit computer simulator with visual circuit representation, assembly programming, and a BASIC-like high-level language that compiles to assembly.
 

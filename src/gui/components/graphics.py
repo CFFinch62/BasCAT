@@ -141,18 +141,113 @@ class IOPortVisual(VisualComponent):
         self.setBrush(QBrush(QColor("#3a1a3a")))
         self.setPen(QPen(QColor("#ff55ff"), 3))
 
-        # Add port labels
+        # Reposition the main "I/O" label to the top instead of centered
+        text_width = self.text.boundingRect().width()
+        self.text.setPos((100 - text_width) / 2, 3)
+
+        # Add port labels below the main label
         self.input_label = QGraphicsTextItem("IN: 0xFF", self)
         self.input_label.setDefaultTextColor(QColor("#aaaaaa"))
         input_font = QFont("Courier New", 8, QFont.Weight.Normal)
         self.input_label.setFont(input_font)
-        self.input_label.setPos(10, 30)
+        self.input_label.setPos(10, 28)
 
         self.output_label = QGraphicsTextItem("OUT: 0xFE", self)
         self.output_label.setDefaultTextColor(QColor("#aaaaaa"))
         output_font = QFont("Courier New", 8, QFont.Weight.Normal)
         self.output_label.setFont(output_font)
-        self.output_label.setPos(10, 48)
+        self.output_label.setPos(10, 46)
+
+
+class StackVisual(VisualComponent):
+    """Visual representation of the stack showing top entries"""
+    
+    # Signal emitted when stack is clicked
+    clicked = None  # Will be set by CircuitView
+    
+    def __init__(self, x, y, memory=None):
+        super().__init__(x, y, 85, 120, "Stack", show_value=False)
+        self.setBrush(QBrush(QColor("#2a1a2a")))
+        self.setPen(QPen(QColor("#aa55aa"), 2))
+        self.memory = memory
+        self.sp_value = 0xFD
+        
+        # Reposition the main "Stack" label to the top
+        text_width = self.text.boundingRect().width()
+        self.text.setPos((85 - text_width) / 2, 2)
+        
+        # Stack entry labels (show top 4 entries)
+        self.entry_labels = []
+        entry_font = QFont("Courier New", 8, QFont.Weight.Normal)
+        
+        for i in range(4):
+            label = QGraphicsTextItem("--: --", self)
+            label.setDefaultTextColor(QColor("#aaaaaa"))
+            label.setFont(entry_font)
+            label.setPos(5, 22 + i * 18)
+            self.entry_labels.append(label)
+            
+        # Click hint
+        self.hint_text = QGraphicsTextItem("▼ Click", self)
+        self.hint_text.setDefaultTextColor(QColor("#666666"))
+        hint_font = QFont("Arial", 7)
+        self.hint_text.setFont(hint_font)
+        hint_width = self.hint_text.boundingRect().width()
+        self.hint_text.setPos((85 - hint_width) / 2, 100)
+        
+        # Make clickable
+        self.setAcceptHoverEvents(True)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        
+    def set_memory(self, memory):
+        """Set memory reference for reading stack contents"""
+        self.memory = memory
+        self.update_display()
+        
+    def set_sp(self, sp_value):
+        """Update stack pointer and refresh display"""
+        self.sp_value = sp_value
+        self.update_display()
+        
+    def update_display(self):
+        """Update the stack entry display"""
+        for i, label in enumerate(self.entry_labels):
+            addr = 0xFD - i  # Stack addresses from top
+            
+            if addr <= self.sp_value:
+                # Below or at SP - empty
+                label.setPlainText(f"{addr:02X}: --")
+                label.setDefaultTextColor(QColor("#555555"))
+            else:
+                # Above SP - has data
+                if self.memory:
+                    try:
+                        value = self.memory._data[addr]
+                        label.setPlainText(f"{addr:02X}: {value:02X}")
+                        label.setDefaultTextColor(QColor("#55ff55"))
+                    except (IndexError, AttributeError):
+                        label.setPlainText(f"{addr:02X}: ??")
+                        label.setDefaultTextColor(QColor("#ff5555"))
+                else:
+                    label.setPlainText(f"{addr:02X}: ??")
+                    label.setDefaultTextColor(QColor("#888888"))
+                    
+    def mousePressEvent(self, event):
+        """Handle click to toggle memory panel"""
+        if self.clicked:
+            self.clicked()
+        super().mousePressEvent(event)
+        
+    def hoverEnterEvent(self, event):
+        """Highlight on hover"""
+        self.setPen(QPen(QColor("#ff88ff"), 3))
+        super().hoverEnterEvent(event)
+        
+    def hoverLeaveEvent(self, event):
+        """Remove highlight"""
+        self.setPen(QPen(QColor("#aa55aa"), 2))
+        super().hoverLeaveEvent(event)
+
 
 class BusVisual(QGraphicsItem):
     def __init__(self, path_points, label="Bus"):
