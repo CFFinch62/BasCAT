@@ -256,6 +256,50 @@
         "Data area",
         "Free RAM"
       ]
+    },
+    {
+      "id": "asm_stack_swap",
+      "title": "[ASM] Stack Swap",
+      "category": "Assembly",
+      "difficulty": "Intermediate",
+      "file": "assembly/10_stack_swap.asm",
+      "description": "Assembly: Swap two register values using only the stack - no temporary register needed.",
+      "concepts": [
+        "PUSH",
+        "POP",
+        "Stack",
+        "Register swap"
+      ]
+    },
+    {
+      "id": "asm_stack_subroutine",
+      "title": "[ASM] Stack Subroutine",
+      "category": "Assembly",
+      "difficulty": "Advanced",
+      "file": "assembly/11_stack_subroutine.asm",
+      "description": "Assembly: Simulate subroutine calls using stack for parameter passing.",
+      "concepts": [
+        "PUSH",
+        "POP",
+        "Stack",
+        "Subroutines",
+        "Parameter passing"
+      ]
+    },
+    {
+      "id": "asm_stack_expression",
+      "title": "[ASM] Stack Expression",
+      "category": "Assembly",
+      "difficulty": "Advanced",
+      "file": "assembly/12_stack_expression.asm",
+      "description": "Assembly: Evaluate (3+7)*2 using stack-based expression evaluation.",
+      "concepts": [
+        "PUSH",
+        "POP",
+        "Stack",
+        "Expression evaluation",
+        "Intermediate results"
+      ]
     }
   ],
   "categories": [
