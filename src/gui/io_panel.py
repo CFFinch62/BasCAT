@@ -39,12 +39,13 @@ class IOPanel(QWidget):
         main_layout.setContentsMargins(5, 5, 5, 5)
         main_layout.setSpacing(5)
 
-        # Mode selection at the top
+        # Mode selection at the top (vertical stack for narrower panel)
         mode_group = QGroupBox("I/O Mode")
-        mode_layout = QHBoxLayout()
+        mode_layout = QVBoxLayout()
+        mode_layout.setSpacing(2)
         
-        self.ascii_radio = QRadioButton("ASCII (character-by-character)")
-        self.numeric_radio = QRadioButton("Numeric (decimal values)")
+        self.ascii_radio = QRadioButton("ASCII (char-by-char)")
+        self.numeric_radio = QRadioButton("Numeric (0-255)")
         self.ascii_radio.setChecked(True)
         
         self.mode_button_group = QButtonGroup()

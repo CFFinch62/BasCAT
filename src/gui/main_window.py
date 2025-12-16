@@ -23,27 +23,27 @@ class MainWindow(QMainWindow):
         # Set application icon
         from PyQt6.QtGui import QIcon
         import os
-        icon_path = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "bascat_icon_512_v2.png")
+        icon_path = os.path.join(os.path.dirname(__file__), "..", "..", "icons", "bascat_icon_512_v2.png")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
 
         # Simulation Backbone
         self.sim = SimManager()
 
-        # Central Widget: Splitter with CPU Circuit and Memory Panel
-        self.central_splitter = QSplitter(Qt.Orientation.Horizontal)
+        # Central Widget: Vertical Splitter with CPU Circuit on top, Memory Panel below
+        self.central_splitter = QSplitter(Qt.Orientation.Vertical)
         
-        # Left: Circuit View (CPU visualization)
+        # Top: Circuit View (CPU visualization) - gets full width
         self.central_widget = CircuitView()
         self.central_splitter.addWidget(self.central_widget)
         
-        # Right: Memory Panel (stack/memory viewer)
+        # Bottom: Memory Panel (stack/memory viewer)
         self.memory_panel = MemoryPanel()
         self.central_splitter.addWidget(self.memory_panel)
         
-        # Set initial sizes (circuit wider, memory narrower)
-        self.central_splitter.setSizes([550, 250])
-        self._memory_panel_last_size = 250  # Track last size for toggle
+        # Set initial sizes (circuit taller, memory panel shorter)
+        self.central_splitter.setSizes([450, 200])
+        self._memory_panel_last_size = 200  # Track last size for toggle
         
         self.setCentralWidget(self.central_splitter)
 

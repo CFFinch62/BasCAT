@@ -1,0 +1,15 @@
+10 REM Memory Demo - Using POKE and PEEK
+20 REM Store values in the free data area (addresses 154-237)
+30 REM 
+40 POKE 154, 72
+50 POKE 155, 105
+60 POKE 156, 33
+70 REM
+80 REM Read them back with PEEK
+90 LET A = PEEK(154)
+100 PRINT A
+110 LET A = PEEK(155)
+120 PRINT A
+130 LET A = PEEK(156)
+140 PRINT A
+150 END
