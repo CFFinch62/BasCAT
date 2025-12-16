@@ -55,6 +55,10 @@ Thumbs.db
 # Project specific
 *.log
 .cache/
+BasCAT_CS_Course/
+venv-linux/
+venv-win/
+dist_package/
 
 # Temporary files
 *.tmp
